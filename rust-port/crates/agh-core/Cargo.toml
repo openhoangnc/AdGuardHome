@@ -1,0 +1,19 @@
+[package]
+name = "agh-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde       = { workspace = true }
+serde_json  = { workspace = true }
+serde_yaml  = { workspace = true }
+clap        = { workspace = true }
+thiserror   = { workspace = true }
+tracing     = { workspace = true }
+tokio       = { workspace = true }
+chrono      = { workspace = true }
+ipnet       = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

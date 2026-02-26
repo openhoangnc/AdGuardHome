@@ -1,0 +1,24 @@
+[package]
+name = "agh-main"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "adguardhome"
+path = "src/main.rs"
+
+[dependencies]
+agh-core           = { path = "../agh-core" }
+agh-filtering      = { path = "../agh-filtering" }
+agh-dns            = { path = "../agh-dns" }
+agh-dhcp           = { path = "../agh-dhcp" }
+agh-stats          = { path = "../agh-stats" }
+agh-querylog       = { path = "../agh-querylog" }
+agh-web            = { path = "../agh-web" }
+agh-updater        = { path = "../agh-updater" }
+tokio              = { workspace = true }
+anyhow             = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+axum             = { workspace = true }
+clap             = { workspace = true }

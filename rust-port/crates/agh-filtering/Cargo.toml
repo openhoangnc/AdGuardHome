@@ -1,0 +1,24 @@
+[package]
+name = "agh-filtering"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+agh-core     = { path = "../agh-core" }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+tokio        = { workspace = true }
+thiserror    = { workspace = true }
+tracing      = { workspace = true }
+aho-corasick = { workspace = true }
+notify       = { workspace = true }
+reqwest      = { workspace = true }
+regex        = { workspace = true }
+sha2         = { workspace = true }
+hex          = { workspace = true }
+chrono       = { workspace = true }
+async-trait  = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true }

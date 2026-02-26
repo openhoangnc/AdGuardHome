@@ -1,0 +1,52 @@
+! EasyList sample — 50 rules for testing the AdGuardHome Rust port parser
+! Auto-generated fixture; not a real EasyList file.
+||ads.example.com^
+||tracker.example.org^
+||doubleclick.net^
+||googlesyndication.com^
+||adservice.google.com^
+||analytics.example.com^
+||metrics.example.org^
+||telemetry.microsoft.com^
+||ads.facebook.com^
+||pixel.facebook.com^
+0.0.0.0 bad.example.com
+0.0.0.0 evil.example.org
+127.0.0.1 malware.example.com
+@@||safe.example.com^
+@@||cdn.example.org^
+||banner.example.com^
+||popup.example.net^
+||click.example.io^
+||impression.example.com^
+||advert.example.co.uk^
+||tracking.example.de^
+||stats.example.fr^
+||measure.example.jp^
+||beacon.example.au^
+||collect.example.br^
+||report.example.ru^
+||ping.example.cn^
+||hit.example.kr^
+||counter.example.pl^
+||pixel.example.mx^
+! This is a comment line
+# Also a comment line
+||ads2.example.com^
+||ads3.example.com^
+||ads4.example.com^
+||ads5.example.com^
+||spam1.example.com^
+||spam2.example.com^
+||spam3.example.com^
+||spam4.example.com^
+||junk1.example.com^
+||junk2.example.com^
+*.adverts.example.com
+*.banners.example.com
+/ads\d+\.example\.com/
+||block1.example.com^$important
+||block2.example.com^
+||block3.example.com^
+||block4.example.com^
+||block5.example.com^

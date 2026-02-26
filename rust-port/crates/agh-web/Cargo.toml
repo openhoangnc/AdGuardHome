@@ -1,0 +1,30 @@
+[package]
+name = "agh-web"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+agh-core      = { path = "../agh-core" }
+agh-filtering = { path = "../agh-filtering" }
+agh-dns       = { path = "../agh-dns" }
+agh-dhcp      = { path = "../agh-dhcp" }
+agh-stats     = { path = "../agh-stats" }
+agh-querylog  = { path = "../agh-querylog" }
+agh-updater   = { path = "../agh-updater" }
+axum          = { workspace = true }
+tower         = { workspace = true }
+tower-http    = { workspace = true }
+tokio         = { workspace = true }
+rust-embed    = { workspace = true }
+redb          = { workspace = true }
+serde         = { workspace = true }
+serde_json    = { workspace = true }
+thiserror     = { workspace = true }
+tracing       = { workspace = true }
+chrono        = { workspace = true }
+uuid          = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true }
+tower = { workspace = true }

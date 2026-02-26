@@ -1,0 +1,24 @@
+schema_version: 28
+http:
+  address: 127.0.0.1:3000
+users: []
+auth_attempts: 5
+block_auth_min: 15
+dns:
+  bind_hosts:
+    - 127.0.0.1
+  port: 5353
+  upstream_dns:
+    - 8.8.8.8
+  filtering_enabled: true
+tls:
+  enabled: false
+filters: []
+whitelist_filters: []
+user_rules: []
+dhcp:
+  enabled: false
+statistics:
+  enabled: false
+querylog:
+  enabled: false
