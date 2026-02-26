@@ -8,7 +8,7 @@ This is a large-scale rewrite project. The Go backend is ~62.5% of the codebase,
 
 | Aspect | Current (Go) | Target (Rust) |
 |---|---|---|
-| Language | Go 1.25+ | Rust 2026 (1.93.1) edition |
+| Language | Go 1.25+ | Rust 2026 (1.93) edition |
 | DNS library | `dnsproxy`, `miekg/dns` | `hickory-dns` (formerly trust-dns) |
 | HTTP server | `net/http` (stdlib) | `axum` + `tokio` |
 | Config format | YAML (`AdGuardHome.yaml`) | Same YAML, parsed with `serde_yaml` |
@@ -58,22 +58,22 @@ adguardhome-rust/
 
 ```toml
 [workspace.dependencies]
-tokio          = { version = "1", features = ["full"] }
-axum           = "0.7"
-tower          = "0.4"
-serde          = { version = "1", features = ["derive"] }
-serde_json     = "1"
+tokio          = { version = "1.49", features = ["full"] }
+axum           = "0.8"
+tower          = "0.5"
+serde          = { version = "1.0", features = ["derive"] }
+serde_json     = "1.0"
 serde_yaml     = "0.9"
-hickory-server = "0.24"
-hickory-resolver = "0.24"
+hickory-server = "0.25"
+hickory-resolver = "0.25"
 rustls         = "0.23"
 tokio-rustls   = "0.26"
-redb           = "2"           # session DB (replaces BoltDB)
-rust-embed     = "8"           # embed frontend build/
+redb           = "3.1"           # session DB (replaces BoltDB)
+rust-embed     = "8.11"           # embed frontend build/
 tracing        = "0.1"
 tracing-subscriber = "0.3"
-clap           = { version = "4", features = ["derive"] }
-reqwest        = { version = "0.12", features = ["rustls-tls"] }
+clap           = { version = "4.5", features = ["derive"] }
+reqwest        = { version = "0.13", features = ["rustls-tls"] }
 sled           = "0.34"        # optional KV for stats/querylog
 ```
 

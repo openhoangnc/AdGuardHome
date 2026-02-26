@@ -80,7 +80,7 @@ Create the GitHub Actions CI workflow that will validate every subsequent task's
 
 - [ ] Add `rust-port/clippy.toml`:
   ```toml
-  msrv = "1.82"
+  msrv = "1.93"
   ```
 
 - [ ] Verify locally:

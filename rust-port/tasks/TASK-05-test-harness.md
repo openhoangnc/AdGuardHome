@@ -31,8 +31,8 @@ Set up the test infrastructure that will be used throughout the project to verif
   ```toml
   [workspace.dev-dependencies]
   tokio-test   = "0.4"
-  reqwest      = { version = "0.12", features = ["json", "cookies"] }
-  serde_json   = "1"
+  reqwest      = { version = "0.13", features = ["json", "cookies"] }
+  serde_json   = "1.0"
   ```
 - [ ] Update `client/` Playwright test config to support `RUST_BACKEND_URL` env var — **DO NOT modify any `client/` source; only update `client/config.ts` or the Playwright config if it exists at root level**
 
