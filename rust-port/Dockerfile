@@ -25,8 +25,9 @@ FROM --platform=$BUILDPLATFORM rust:1.93-alpine AS rust-builder
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-# Install musl-dev + cross-compile tools.
-RUN apk add --no-cache musl-dev gcc g++ make perl git
+# Install musl-dev + zig (universal C cross-compiler) + cargo-zigbuild.
+RUN apk add --no-cache musl-dev gcc g++ make perl git zig && \
+    cargo install cargo-zigbuild
 
 WORKDIR /build
 
@@ -45,7 +46,7 @@ RUN case "$TARGETPLATFORM" in \
     echo "$TARGET" > /tmp/target
 
 # ── Layer-cache trick: compile dependencies before copying source ──────────
-# Copy only the workspace manifests and lock file first so that `cargo build`
+# Copy only the workspace manifests and lock file first so that `cargo zigbuild`
 # caches all dependencies in a dedicated layer.  Source changes won't bust
 # this layer.
 COPY rust-port/Cargo.toml rust-port/Cargo.lock ./
@@ -66,13 +67,13 @@ RUN for d in agh-core agh-filtering agh-dns agh-dhcp agh-stats agh-querylog agh-
     mkdir -p crates/agh-main/src && echo "fn main(){}" > crates/agh-main/src/main.rs
 
 RUN TARGET=$(cat /tmp/target) && \
-    cargo build --release --target "$TARGET" 2>&1 | tail -5 || true
+    cargo zigbuild --release --target "$TARGET" 2>&1 | tail -5 || true
 
 # ── Copy real source and build the final binary ────────────────────────────
 COPY rust-port/crates/ ./crates/
 
 RUN TARGET=$(cat /tmp/target) && \
-    cargo build --release --target "$TARGET" -p agh-main && \
+    cargo zigbuild --release --target "$TARGET" -p agh-main && \
     cp "target/$TARGET/release/adguardhome" /adguardhome
 
 # ── Stage 3: Runtime ───────────────────────────────────────────────────────
