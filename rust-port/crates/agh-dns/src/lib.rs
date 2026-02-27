@@ -20,4 +20,6 @@ pub enum DnsError {
     Upstream(String),
     #[error("Resolver error: {0}")]
     Resolver(String),
+    #[error("{0}")]
+    Other(String),
 }

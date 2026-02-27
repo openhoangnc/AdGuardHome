@@ -1,0 +1,131 @@
+schema_version: 28
+http:
+  address: 0.0.0.0:3000
+  session_ttl: 720h
+users:
+  - name: admin
+    password: $2b$10$maximal_config_bcrypt_hash_here
+auth_attempts: 5
+block_auth_min: 15
+dns:
+  bind_hosts:
+    - 0.0.0.0
+  port: 53
+  upstream_dns:
+    - 8.8.8.8
+    - tls://dns.cloudflare.com
+    - https://dns10.quad9.net/dns-query
+  bootstrap_dns:
+    - 9.9.9.10
+    - 149.112.112.10
+    - 2620:fe::10
+  fallback_dns:
+    - 8.8.8.8
+  all_servers: false
+  fastest_addr: true
+  cache_size: 8388608
+  cache_ttl_min: 300
+  cache_ttl_max: 3600
+  filtering_enabled: true
+  filters_update_interval: 12
+  parental_enabled: true
+  safebrowsing_enabled: true
+  aaaa_disabled: false
+  enable_dnssec: true
+  upstream_mode: parallel
+  resolve_clients: true
+  use_private_ptr_resolvers: true
+  local_domain_name: home.arpa
+  rewrites:
+    - domain: router.home.arpa
+      answer: 192.168.1.1
+    - domain: nas.home.arpa
+      answer: 192.168.1.5
+tls:
+  enabled: true
+  server_name: home.example.com
+  force_https: true
+  port_https: 443
+  port_dns_over_tls: 853
+  port_dns_over_quic: 784
+  certificate_chain: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t'
+  private_key: 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0t'
+  certificate_path: ''
+  private_key_path: ''
+  strict_sni_check: true
+filters:
+  - id: 1
+    enabled: true
+    url: https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
+    name: AdGuard DNS filter
+  - id: 2
+    enabled: true
+    url: https://someonewhocares.org/hosts/zero/hosts
+    name: Dan Pollock's List
+  - id: 3
+    enabled: false
+    url: https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=1&mimetype=plaintext
+    name: Peter Lowe's List
+whitelist_filters:
+  - id: 1000
+    enabled: true
+    url: https://example.com/my-whitelist.txt
+    name: My Whitelist
+user_rules:
+  - '||ads.example.com^'
+  - '@@||good.example.com^'
+  - '/regex-blocked\.example\.com/'
+dhcp:
+  enabled: true
+  interface_name: eth0
+  local_domain_name: home.arpa
+  dhcpv4:
+    gateway_ip: 192.168.1.1
+    subnet_mask: 255.255.255.0
+    range_start: 192.168.1.100
+    range_end: 192.168.1.200
+    lease_duration: 86400
+  dhcpv6:
+    range_start: 'fd12:3456:789a::1'
+    lease_duration: 86400
+clients:
+  persistent:
+    - ids:
+        - 192.168.1.50
+      name: My Laptop
+      tags: []
+      use_global_settings: false
+      filtering_enabled: true
+      parental_enabled: false
+      safebrowsing_enabled: false
+      safe_search:
+        enabled: false
+      blocked_services:
+        ids: []
+      upstreams:
+        - 8.8.8.8
+statistics:
+  enabled: true
+  interval: 168h
+  ignored:
+    - stats.example.com
+querylog:
+  enabled: true
+  size_mb: 500
+  interval: 30d
+  anonymize_client_ip: true
+  ignored:
+    - private.example.com
+log:
+  enabled: true
+  file: /var/log/adguardhome.log
+  max_backups: 5
+  max_size: 100
+  max_age: 30
+  compress: true
+  local_time: true
+  verbose: false
+os:
+  group: adguard
+  user: adguard
+  rlimit_nofile: 65536

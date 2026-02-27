@@ -4,13 +4,15 @@ use axum::extract::{Json, State};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use axum::Router;
-use axum::routing::{get, post};
+use axum::routing::{get, post, put};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+use agh_core::config::tls::TlsConfig;
 use agh_core::config_io::ConfigManager;
 
 use crate::auth::{extract_session_token, make_session_cookie, SessionStore};
+use crate::tls_config::validate_cert;
 
 /// Shared application state.
 #[derive(Clone)]
@@ -38,6 +40,10 @@ pub fn create_router(state: AppState) -> Router {
         .route("/install/get_addresses", get(install_get_addresses_handler))
         // Version
         .route("/control/version.json", get(version_handler))
+        // TLS
+        .route("/control/tls/status", get(tls_status_handler))
+        .route("/control/tls/configure", post(tls_configure_handler))
+        .route("/control/tls/validate", post(tls_validate_handler))
         .with_state(state.clone());
 
     // Frontend catch-all
@@ -205,13 +211,108 @@ async fn version_handler() -> impl IntoResponse {
     }))
 }
 
+// ── TLS handlers ──────────────────────────────────────────────────────────────
+
+#[derive(Deserialize)]
+struct TlsConfigRequest {
+    #[serde(default)]
+    enabled: bool,
+    #[serde(default)]
+    server_name: String,
+    #[serde(default)]
+    force_https: bool,
+    #[serde(default = "default_port_https")]
+    port_https: u16,
+    #[serde(default = "default_port_dot")]
+    port_dns_over_tls: u16,
+    #[serde(default = "default_port_doq")]
+    port_dns_over_quic: u16,
+    #[serde(default)]
+    certificate_chain: String,
+    #[serde(default)]
+    private_key: String,
+}
+
+fn default_port_https() -> u16 { 443 }
+fn default_port_dot() -> u16 { 853 }
+fn default_port_doq() -> u16 { 784 }
+
+fn tls_status_json(tls: &TlsConfig) -> serde_json::Value {
+    let info = validate_cert(&tls.certificate_chain, &tls.private_key);
+    json!({
+        "enabled": tls.enabled,
+        "server_name": tls.server_name,
+        "force_https": tls.force_https,
+        "port_https": tls.port_https,
+        "port_dns_over_tls": tls.port_dns_over_tls,
+        "port_dns_over_quic": tls.port_dns_over_quic,
+        "certificate_chain": tls.certificate_chain,
+        "private_key": tls.private_key,
+        "valid_cert": info.is_valid,
+        "valid_key": info.valid_key,
+        "valid_pair": info.valid_pair,
+        "not_after": info.not_after,
+        "warning_validation": info.warning,
+    })
+}
+
+async fn tls_status_handler(State(state): State<AppState>) -> impl IntoResponse {
+    let cfg = state.config.get_async().await;
+    Json(tls_status_json(&cfg.tls))
+}
+
+async fn tls_configure_handler(
+    State(state): State<AppState>,
+    Json(body): Json<TlsConfigRequest>,
+) -> impl IntoResponse {
+    state
+        .config
+        .update(|cfg| {
+            cfg.tls.enabled = body.enabled;
+            cfg.tls.server_name = body.server_name.clone();
+            cfg.tls.force_https = body.force_https;
+            cfg.tls.port_https = body.port_https;
+            cfg.tls.port_dns_over_tls = body.port_dns_over_tls;
+            cfg.tls.port_dns_over_quic = body.port_dns_over_quic;
+            cfg.tls.certificate_chain = body.certificate_chain.clone();
+            cfg.tls.private_key = body.private_key.clone();
+        })
+        .await
+        .map(|_| {
+            let info = validate_cert(&body.certificate_chain, &body.private_key);
+            (StatusCode::OK, Json(json!({
+                "valid_cert": info.is_valid,
+                "valid_key": info.valid_key,
+                "valid_pair": info.valid_pair,
+                "warning_validation": info.warning,
+            }))).into_response()
+        })
+        .unwrap_or_else(|e| {
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"message": e.to_string()}))).into_response()
+        })
+}
+
+async fn tls_validate_handler(
+    Json(body): Json<TlsConfigRequest>,
+) -> impl IntoResponse {
+    let info = validate_cert(&body.certificate_chain, &body.private_key);
+    Json(json!({
+        "enabled": body.enabled,
+        "server_name": body.server_name,
+        "valid_cert": info.is_valid,
+        "valid_key": info.valid_key,
+        "valid_pair": info.valid_pair,
+        "not_after": info.not_after,
+        "warning_validation": info.warning,
+    }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use axum::http::Request;
     use axum::body::Body;
     use tower::ServiceExt;
-    use std::path::PathBuf;
 
     async fn test_state() -> AppState {
         let dir = tempfile::tempdir().expect("tempdir");
@@ -256,5 +357,40 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_tls_status_returns_200() {
+        let state = test_state().await;
+        let app = create_router(state);
+        let response = app
+            .oneshot(Request::get("/control/tls/status").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn test_tls_validate_empty_certs() {
+        let state = test_state().await;
+        let app = create_router(state);
+        let body = serde_json::json!({
+            "enabled": false,
+            "certificate_chain": "",
+            "private_key": ""
+        });
+        let response = app
+            .oneshot(
+                Request::post("/control/tls/validate")
+                    .header("content-type", "application/json")
+                    .body(Body::from(serde_json::to_string(&body).unwrap()))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(json["valid_pair"], false);
     }
 }

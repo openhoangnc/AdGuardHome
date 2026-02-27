@@ -83,19 +83,14 @@ pub fn extract_session_token(headers: &HeaderMap) -> Option<String> {
     None
 }
 
-/// Verify a password hash. Uses plain comparison for now.
-/// TODO: Use bcrypt/scrypt as the Go implementation does.
+/// Verify a bcrypt password hash against the given plain-text password.
+///
+/// Compatible with the Go `bcrypt.CompareHashAndPassword` implementation.
 pub fn verify_password(hash: &str, password: &str) -> bool {
-    // Go uses bcrypt. For now, check if hash equals password directly
-    // (valid only for tests) or if it looks like a bcrypt hash.
-    if hash.starts_with("$2y$") || hash.starts_with("$2a$") || hash.starts_with("$2b$") {
-        // bcrypt verification would require a bcrypt crate.
-        // Stub: accept if we have any hash.
-        true
-    } else {
-        // Plain text comparison (only for development/testing).
-        hash == password
+    if hash.is_empty() {
+        return false;
     }
+    bcrypt::verify(password, hash).unwrap_or(false)
 }
 
 #[cfg(test)]

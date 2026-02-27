@@ -1,0 +1,35 @@
+; DNS query fixture file for compliance testing (dnsperf / flamethrower format).
+; Each line: <domain> <qtype>
+; These represent a mix of real-world query patterns.
+
+; Popular domains (should resolve via upstream)
+google.com A
+google.com AAAA
+www.google.com A
+github.com A
+github.com AAAA
+cloudflare.com A
+example.com A
+example.com MX
+example.com TXT
+example.com AAAA
+example.com NS
+
+; Domains that should be blocked (common ad networks)
+ads.example.com A
+tracking.example.com A
+doubleclick.net A
+googlesyndication.com A
+adservice.google.com A
+
+; PTR queries (reverse DNS)
+8.8.8.8.in-addr.arpa PTR
+1.1.1.1.in-addr.arpa PTR
+
+; CNAME chains
+www.example.com CNAME
+mail.google.com MX
+
+; TXT records (SPF, DKIM etc.)
+_dmarc.google.com TXT
+_spf.google.com TXT

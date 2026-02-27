@@ -1,0 +1,49 @@
+# Docker build context exclusions.
+# Excludes build artifacts, dev tooling, and large directories that are not
+# needed inside the Docker build context.
+
+# Rust build artifacts
+rust-port/target/
+rust-port/crates/*/target/
+
+# Node.js
+client/node_modules/
+.pnp
+.pnp.js
+
+# Go build artifacts
+*.exe
+*.test
+*.out
+
+# Version control
+.git/
+.gitignore
+
+# CI/CD
+.github/
+.circleci/
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+tmp/
+.tmp/
+
+# Test reports and coverage
+coverage/
+htmlcov/
+.coverage
+
+# Documentation build artifacts
+docs/_build/
+site/

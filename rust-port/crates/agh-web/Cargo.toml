@@ -23,8 +23,15 @@ thiserror     = { workspace = true }
 tracing       = { workspace = true }
 chrono        = { workspace = true }
 uuid          = { workspace = true }
+rustls        = { workspace = true }
+tokio-rustls  = { workspace = true }
+rustls-pemfile = { workspace = true }
+bcrypt        = { workspace = true }
 
 [dev-dependencies]
 tempfile = "3"
 tokio = { workspace = true }
 tower = { workspace = true }
+rcgen = { workspace = true }
+bcrypt = { workspace = true }
+bytes = { workspace = true }

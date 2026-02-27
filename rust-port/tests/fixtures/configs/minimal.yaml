@@ -1,0 +1,8 @@
+schema_version: 28
+http:
+  address: 0.0.0.0:3000
+users: []
+dns:
+  bind_hosts:
+    - 0.0.0.0
+  port: 53

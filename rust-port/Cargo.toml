@@ -47,6 +47,10 @@ bytes              = "1"
 aho-corasick       = "1.1"
 regex              = "1"
 ipnet              = "2"
+criterion          = { version = "0.5", features = ["html_reports"] }
+bcrypt             = "0.15"
+rcgen              = "0.13"
+rustls-pemfile     = { version = "2", package = "rustls-pemfile" }
 
 [profile.release]
 strip         = true

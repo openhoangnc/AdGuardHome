@@ -16,4 +16,13 @@ axum             = { workspace = true }
 thiserror        = { workspace = true }
 tracing          = { workspace = true }
 async-trait      = { workspace = true }
-bytes            = { workspace = true }
+quinn            = { workspace = true }
+rustls-pemfile   = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+tokio = { workspace = true }
+
+[[bench]]
+name = "dns"
+harness = false
