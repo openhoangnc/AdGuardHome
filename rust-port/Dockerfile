@@ -29,17 +29,15 @@ ARG BUILDPLATFORM
 RUN apk add --no-cache musl-dev gcc g++ make perl git zig && \
     cargo install cargo-zigbuild
 
-WORKDIR /build
+# Use /app as WORKDIR so that rust-port/ lives at /app/rust-port/ and
+# #[folder = "../../../build"] in agh-web resolves to /app/build/ —
+# the same path where the frontend stage places its output.
+WORKDIR /app
 
 # Map Docker platform to Rust target triple.
 RUN case "$TARGETPLATFORM" in \
     "linux/amd64")   TARGET="x86_64-unknown-linux-musl" ;; \
     "linux/arm64")   TARGET="aarch64-unknown-linux-musl" ;; \
-    "linux/arm/v7")  TARGET="armv7-unknown-linux-musleabihf" ;; \
-    "linux/arm/v6")  TARGET="arm-unknown-linux-musleabihf" ;; \
-    "linux/386")     TARGET="i686-unknown-linux-musl" ;; \
-    "linux/ppc64le") TARGET="powerpc64le-unknown-linux-gnu" ;; \
-    "linux/s390x")   TARGET="s390x-unknown-linux-gnu" ;; \
     *) echo "Unsupported platform: $TARGETPLATFORM" && exit 1 ;; \
     esac && \
     rustup target add "$TARGET" && \
@@ -49,31 +47,35 @@ RUN case "$TARGETPLATFORM" in \
 # Copy only the workspace manifests and lock file first so that `cargo zigbuild`
 # caches all dependencies in a dedicated layer.  Source changes won't bust
 # this layer.
-COPY rust-port/Cargo.toml rust-port/Cargo.lock ./
-COPY rust-port/crates/agh-core/Cargo.toml      ./crates/agh-core/
-COPY rust-port/crates/agh-filtering/Cargo.toml  ./crates/agh-filtering/
-COPY rust-port/crates/agh-dns/Cargo.toml        ./crates/agh-dns/
-COPY rust-port/crates/agh-dhcp/Cargo.toml       ./crates/agh-dhcp/
-COPY rust-port/crates/agh-stats/Cargo.toml      ./crates/agh-stats/
-COPY rust-port/crates/agh-querylog/Cargo.toml   ./crates/agh-querylog/
-COPY rust-port/crates/agh-web/Cargo.toml        ./crates/agh-web/
-COPY rust-port/crates/agh-updater/Cargo.toml    ./crates/agh-updater/
-COPY rust-port/crates/agh-main/Cargo.toml       ./crates/agh-main/
+COPY rust-port/Cargo.toml rust-port/Cargo.lock ./rust-port/
+COPY rust-port/crates/agh-core/Cargo.toml      ./rust-port/crates/agh-core/
+COPY rust-port/crates/agh-filtering/Cargo.toml  ./rust-port/crates/agh-filtering/
+COPY rust-port/crates/agh-dns/Cargo.toml        ./rust-port/crates/agh-dns/
+COPY rust-port/crates/agh-dhcp/Cargo.toml       ./rust-port/crates/agh-dhcp/
+COPY rust-port/crates/agh-stats/Cargo.toml      ./rust-port/crates/agh-stats/
+COPY rust-port/crates/agh-querylog/Cargo.toml   ./rust-port/crates/agh-querylog/
+COPY rust-port/crates/agh-web/Cargo.toml        ./rust-port/crates/agh-web/
+COPY rust-port/crates/agh-updater/Cargo.toml    ./rust-port/crates/agh-updater/
+COPY rust-port/crates/agh-main/Cargo.toml       ./rust-port/crates/agh-main/
 
 # Create empty lib.rs / main.rs stubs so `cargo build` can fetch & compile deps.
 RUN for d in agh-core agh-filtering agh-dns agh-dhcp agh-stats agh-querylog agh-web agh-updater; do \
-    mkdir -p "crates/$d/src" && echo "// stub" > "crates/$d/src/lib.rs"; \
+    mkdir -p "rust-port/crates/$d/src" && echo "// stub" > "rust-port/crates/$d/src/lib.rs"; \
     done && \
-    mkdir -p crates/agh-main/src && echo "fn main(){}" > crates/agh-main/src/main.rs
+    mkdir -p rust-port/crates/agh-main/src && echo "fn main(){}" > rust-port/crates/agh-main/src/main.rs
 
 RUN TARGET=$(cat /tmp/target) && \
-    cargo zigbuild --release --target "$TARGET" 2>&1 | tail -5 || true
+    cd rust-port && cargo zigbuild --release --target "$TARGET" 2>&1 | tail -5 || true
 
-# ── Copy real source and build the final binary ────────────────────────────
-COPY rust-port/crates/ ./crates/
+# ── Copy real source and the pre-built frontend assets ─────────────────────
+COPY rust-port/crates/ ./rust-port/crates/
+# Frontend assets must be present at compile time so rust-embed can embed them.
+# /app/build/ matches the path that #[folder = "../../../build"] resolves to
+# from CARGO_MANIFEST_DIR=/app/rust-port/crates/agh-web.
+COPY --from=frontend /app/build/ ./build/
 
 RUN TARGET=$(cat /tmp/target) && \
-    cargo zigbuild --release --target "$TARGET" -p agh-main && \
+    cd rust-port && cargo zigbuild --release --target "$TARGET" -p agh-main && \
     cp "target/$TARGET/release/adguardhome" /adguardhome
 
 # ── Stage 3: Runtime ───────────────────────────────────────────────────────
