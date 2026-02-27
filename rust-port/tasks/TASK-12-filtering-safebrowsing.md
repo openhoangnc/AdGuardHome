@@ -33,10 +33,10 @@ Implement AdGuard's safe browsing hash-prefix DNS lookup. When safe browsing is 
 
   impl SafeBrowsingChecker {
       pub fn new(enabled: bool) -> Self;
-      
+
       /// Check if domain is flagged by safe browsing (uses hash-prefix protocol)
       pub async fn check(&self, domain: &str) -> SafeBrowsingResult;
-      
+
       pub fn enable(&self);
       pub fn disable(&self);
   }

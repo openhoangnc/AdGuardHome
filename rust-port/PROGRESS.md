@@ -1,7 +1,7 @@
 # AdGuardHome Rust Port — Progress Tracker
 
-> **Last updated**: 2026-02-26  
-> **Rules**: See [RULES.md](./RULES.md) — read before starting any task  
+> **Last updated**: 2026-02-26
+> **Rules**: See [RULES.md](./RULES.md) — read before starting any task
 > **Task files**: `rust-port/tasks/TASK-XX-*.md`
 
 ---

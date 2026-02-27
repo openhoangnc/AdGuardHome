@@ -28,13 +28,13 @@ Implement the blocklist download and auto-update scheduler. Periodically downloa
 
   impl FilterUpdater {
       pub fn new(engine: Arc<RwLock<Arc<FilteringEngine>>>, cache_dir: PathBuf) -> Self;
-      
+
       /// Download and reload a single filter list
       pub async fn update_filter(&self, filter: &FilterConfig) -> Result<UpdateStats, UpdaterError>;
-      
+
       /// Update all enabled filters
       pub async fn update_all(&self) -> Vec<Result<UpdateStats, UpdaterError>>;
-      
+
       /// Start the background auto-update scheduler
       pub fn start_scheduler(self: Arc<Self>, interval: Duration) -> tokio::task::JoinHandle<()>;
   }

@@ -25,9 +25,9 @@ Implement circular buffer time-series stats storage in `redb`. Port from `intern
 
   impl StatsStorage {
       pub fn open(path: &Path, config: StatisticsConfig) -> Result<Self>;
-      
+
       pub fn record(&self, entry: StatsEntry) -> Result<()>;
-      
+
       pub fn get_stats(&self, period: StatsPeriod) -> Result<StatsResponse>;
       pub fn reset(&self) -> Result<()>;
   }

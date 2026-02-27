@@ -42,7 +42,7 @@ Implement safe search rewriting that redirects search engine queries to their "s
   | `duckduckgo.com` | `safe.duckduckgo.com` resolved | — |
   | `youtube.com` | `restrict.youtube.com` resolved | — |
   | `yandex.com/ru/...` | `213.180.193.56` (Yandex safe) | — |
-  
+
   > **Note**: Read the actual IPs from `internal/filtering/safesearch.go` — do not guess.
 
 - [ ] For `google.com` variants, return the A/AAAA records for `forcesafesearch.google.com` (resolve once at startup, cache)

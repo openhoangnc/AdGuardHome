@@ -61,7 +61,7 @@ Run DNS protocol compliance tests against the Rust DNS server using established 
 
 ## Acceptance Criteria
 - All plain DNS queries return correct responses
-- DoH queries work (HTTP 200, correct DNS wire format response)  
+- DoH queries work (HTTP 200, correct DNS wire format response)
 - DoT queries work (TLS handshake succeeds, responses correct)
 - Blocked domains return `0.0.0.0` or NXDOMAIN as configured
 - Response times <5ms for cached queries
