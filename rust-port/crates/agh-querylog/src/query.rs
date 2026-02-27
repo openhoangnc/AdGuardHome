@@ -56,7 +56,10 @@ impl QueryLogService {
 
         let oldest = entries.get(limit.saturating_sub(1)).map(|e| e.time);
         entries.truncate(limit);
-        Ok(QueryLogPage { data: entries, oldest })
+        Ok(QueryLogPage {
+            data: entries,
+            oldest,
+        })
     }
 }
 
@@ -70,21 +73,22 @@ mod tests {
     async fn test_pagination() {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("ql.json");
-        let storage = Arc::new(
-            QueryLogStorage::open(&path, 10).await.expect("open")
-        );
+        let storage = Arc::new(QueryLogStorage::open(&path, 10).await.expect("open"));
 
         for i in 0..10 {
-            storage.append(&QueryLogEntry {
-                time: Utc::now(),
-                question_host: format!("host{i}.example.com"),
-                question_type: "A".to_owned(),
-                question_class: "IN".to_owned(),
-                client: "1.2.3.4".to_owned(),
-                result: serde_json::json!({}),
-                elapsed_ms: i,
-                upstream: "8.8.8.8".to_owned(),
-            }).await.expect("append");
+            storage
+                .append(&QueryLogEntry {
+                    time: Utc::now(),
+                    question_host: format!("host{i}.example.com"),
+                    question_type: "A".to_owned(),
+                    question_class: "IN".to_owned(),
+                    client: "1.2.3.4".to_owned(),
+                    result: serde_json::json!({}),
+                    elapsed_ms: i,
+                    upstream: "8.8.8.8".to_owned(),
+                })
+                .await
+                .expect("append");
         }
 
         let svc = QueryLogService::new(storage);

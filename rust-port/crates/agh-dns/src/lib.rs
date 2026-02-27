@@ -1,8 +1,8 @@
 pub mod cache;
 pub mod dnscrypt;
 pub mod doh;
-pub mod dot;
 pub mod doq;
+pub mod dot;
 pub mod filtering_handler;
 pub mod server;
 pub mod upstream;

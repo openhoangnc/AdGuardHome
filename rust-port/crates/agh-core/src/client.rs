@@ -58,7 +58,9 @@ pub struct PersistentClient {
     pub ignore_statistics: bool,
 }
 
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 /// Source of a runtime-discovered client.
 #[derive(Debug, Clone)]
@@ -95,9 +97,7 @@ impl ClientRegistry {
     /// Find a persistent client whose `ids` match the given IP.
     pub fn find_persistent(&self, ip: &IpAddr) -> Option<PersistentClient> {
         let lock = self.persistent.read().expect("lock poisoned");
-        lock.iter()
-            .find(|c| client_matches(c, ip))
-            .cloned()
+        lock.iter().find(|c| client_matches(c, ip)).cloned()
     }
 
     /// Find a runtime client by exact IP.
@@ -107,7 +107,10 @@ impl ClientRegistry {
 
     /// Register or update a runtime client.
     pub fn add_runtime(&self, client: RuntimeClient) {
-        self.runtime.write().expect("lock poisoned").insert(client.ip, client);
+        self.runtime
+            .write()
+            .expect("lock poisoned")
+            .insert(client.ip, client);
     }
 
     /// Return all persistent clients.
@@ -135,16 +138,24 @@ impl ClientRegistry {
     /// Remove a persistent client by name.
     pub fn remove_persistent(&self, name: &str) -> Result<(), ClientError> {
         let mut lock = self.persistent.write().expect("lock poisoned");
-        let pos = lock.iter().position(|c| c.name == name)
+        let pos = lock
+            .iter()
+            .position(|c| c.name == name)
             .ok_or_else(|| ClientError::NotFound(name.to_owned()))?;
         lock.remove(pos);
         Ok(())
     }
 
     /// Update a persistent client by name.
-    pub fn update_persistent(&self, name: &str, client: PersistentClient) -> Result<(), ClientError> {
+    pub fn update_persistent(
+        &self,
+        name: &str,
+        client: PersistentClient,
+    ) -> Result<(), ClientError> {
         let mut lock = self.persistent.write().expect("lock poisoned");
-        let pos = lock.iter().position(|c| c.name == name)
+        let pos = lock
+            .iter()
+            .position(|c| c.name == name)
             .ok_or_else(|| ClientError::NotFound(name.to_owned()))?;
         lock[pos] = client;
         Ok(())
@@ -212,8 +223,11 @@ mod tests {
     #[test]
     fn test_add_duplicate_name_rejected() {
         let reg = ClientRegistry::new(vec![]);
-        reg.add_persistent(make_client("alice", &["1.2.3.4"])).unwrap();
-        let err = reg.add_persistent(make_client("alice", &["5.6.7.8"])).unwrap_err();
+        reg.add_persistent(make_client("alice", &["1.2.3.4"]))
+            .unwrap();
+        let err = reg
+            .add_persistent(make_client("alice", &["5.6.7.8"]))
+            .unwrap_err();
         assert!(matches!(err, ClientError::DuplicateName(_)));
     }
 

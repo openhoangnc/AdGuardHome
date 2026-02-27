@@ -37,7 +37,9 @@ pub fn parse_line(line: &str) -> Option<FilterRule> {
     if let Some(rest) = line.strip_prefix("@@||") {
         let domain = strip_adblock_anchors(rest);
         if !domain.is_empty() {
-            return Some(FilterRule::DomainAllow { domain: domain.to_lowercase() });
+            return Some(FilterRule::DomainAllow {
+                domain: domain.to_lowercase(),
+            });
         }
     }
 
@@ -45,19 +47,25 @@ pub fn parse_line(line: &str) -> Option<FilterRule> {
     if let Some(rest) = line.strip_prefix("||") {
         let domain = strip_adblock_anchors(rest);
         if !domain.is_empty() {
-            return Some(FilterRule::DomainBlock { domain: domain.to_lowercase() });
+            return Some(FilterRule::DomainBlock {
+                domain: domain.to_lowercase(),
+            });
         }
     }
 
     // Regex rule: /pattern/
     if line.starts_with('/') && line.ends_with('/') && line.len() > 2 {
         let pattern = &line[1..line.len() - 1];
-        return Some(FilterRule::Regex { pattern: pattern.to_owned() });
+        return Some(FilterRule::Regex {
+            pattern: pattern.to_owned(),
+        });
     }
 
     // Wildcard: *.domain.com
     if line.starts_with("*.") {
-        return Some(FilterRule::WildcardBlock { pattern: line.to_lowercase() });
+        return Some(FilterRule::WildcardBlock {
+            pattern: line.to_lowercase(),
+        });
     }
 
     // $dnsrewrite modifier

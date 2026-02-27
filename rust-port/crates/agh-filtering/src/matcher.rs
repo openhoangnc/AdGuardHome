@@ -122,7 +122,9 @@ impl FilteringEngine {
 
         // 1. Allowlist exact.
         if self.exact_allow.contains(domain) {
-            return FilterResult::Allowed { matched_rule: domain.to_owned() };
+            return FilterResult::Allowed {
+                matched_rule: domain.to_owned(),
+            };
         }
 
         // 2. Exact block / rewrite.
@@ -130,27 +132,35 @@ impl FilteringEngine {
             return FilterResult::Rewrite { ip };
         }
         if self.exact_block.contains(domain) {
-            return FilterResult::Blocked { matched_rule: domain.to_owned() };
+            return FilterResult::Blocked {
+                matched_rule: domain.to_owned(),
+            };
         }
 
         // Also check parent domains for block rules (||example.com^ blocks sub.example.com).
         for block_domain in &self.exact_block {
             if domain.ends_with(&format!(".{block_domain}")) {
-                return FilterResult::Blocked { matched_rule: block_domain.clone() };
+                return FilterResult::Blocked {
+                    matched_rule: block_domain.clone(),
+                };
             }
         }
 
         // 3. Wildcard allow.
         for suffix in &self.wildcard_allow {
             if domain == suffix.trim_start_matches('.') || domain.ends_with(suffix.as_str()) {
-                return FilterResult::Allowed { matched_rule: format!("*{suffix}") };
+                return FilterResult::Allowed {
+                    matched_rule: format!("*{suffix}"),
+                };
             }
         }
 
         // 4. Wildcard block.
         for suffix in &self.wildcard_block {
             if domain == suffix.trim_start_matches('.') || domain.ends_with(suffix.as_str()) {
-                return FilterResult::Blocked { matched_rule: format!("*{suffix}") };
+                return FilterResult::Blocked {
+                    matched_rule: format!("*{suffix}"),
+                };
             }
         }
 
@@ -171,7 +181,9 @@ impl FilteringEngine {
                 let pattern = &self.ac_domains[m.pattern().as_usize()];
                 // Accept only if the match is a full domain or sub-domain boundary.
                 if is_domain_match(domain, pattern) {
-                    return FilterResult::Blocked { matched_rule: pattern.clone() };
+                    return FilterResult::Blocked {
+                        matched_rule: pattern.clone(),
+                    };
                 }
             }
         }
@@ -200,10 +212,7 @@ mod tests {
     use crate::parser::parse_line;
 
     fn build_engine(rules_str: &[&str]) -> FilteringEngine {
-        let rules = rules_str
-            .iter()
-            .filter_map(|s| parse_line(s))
-            .collect();
+        let rules = rules_str.iter().filter_map(|s| parse_line(s)).collect();
         FilteringEngine::build(rules)
     }
 
@@ -228,14 +237,23 @@ mod tests {
     #[test]
     fn test_allowlist_overrides_block() {
         let engine = build_engine(&["||example.com^", "@@||safe.example.com^"]);
-        assert!(matches!(engine.check_domain("safe.example.com"), FilterResult::Allowed { .. }));
-        assert!(matches!(engine.check_domain("ads.example.com"), FilterResult::Blocked { .. }));
+        assert!(matches!(
+            engine.check_domain("safe.example.com"),
+            FilterResult::Allowed { .. }
+        ));
+        assert!(matches!(
+            engine.check_domain("ads.example.com"),
+            FilterResult::Blocked { .. }
+        ));
     }
 
     #[test]
     fn test_no_match() {
         let engine = build_engine(&["||ads.example.com^"]);
-        assert!(matches!(engine.check_domain("google.com"), FilterResult::NoMatch));
+        assert!(matches!(
+            engine.check_domain("google.com"),
+            FilterResult::NoMatch
+        ));
     }
 
     #[test]

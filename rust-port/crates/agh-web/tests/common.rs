@@ -2,8 +2,8 @@
 
 use std::sync::Arc;
 
-use agh_web::routes::AppState;
 use agh_web::auth::SessionStore;
+use agh_web::routes::AppState;
 use axum::Router;
 
 pub async fn test_app() -> Router {
@@ -18,7 +18,10 @@ pub async fn test_app() -> Router {
             .await
             .expect("load config"),
     );
-    let state = AppState { config, sessions: Arc::new(SessionStore::new()) };
+    let state = AppState {
+        config,
+        sessions: Arc::new(SessionStore::new()),
+    };
     agh_web::create_router(state)
 }
 

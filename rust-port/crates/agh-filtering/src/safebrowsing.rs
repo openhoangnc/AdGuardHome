@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use sha2::{Digest, Sha256};
@@ -71,7 +71,10 @@ impl SafeBrowsingChecker {
             }
             cache.insert(
                 prefix,
-                CacheEntry { result, expires_at: Instant::now() + Self::CACHE_TTL },
+                CacheEntry {
+                    result,
+                    expires_at: Instant::now() + Self::CACHE_TTL,
+                },
             );
         }
 

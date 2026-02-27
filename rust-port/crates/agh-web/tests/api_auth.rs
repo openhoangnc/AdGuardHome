@@ -38,12 +38,17 @@ async fn login_with_valid_credentials_sets_cookie() {
     let dir = tempfile::tempdir().expect("tempdir");
     let cfg_path = dir.path().join("AdGuardHome.yaml");
     let config = std::sync::Arc::new(
-        agh_core::config_io::ConfigManager::load(&cfg_path).await.expect("load"),
+        agh_core::config_io::ConfigManager::load(&cfg_path)
+            .await
+            .expect("load"),
     );
     let hash = bcrypt::hash("password", 10).expect("bcrypt hash");
     config
         .update(|cfg| {
-            cfg.users.push(User { name: "admin".to_owned(), password: hash.clone() });
+            cfg.users.push(User {
+                name: "admin".to_owned(),
+                password: hash.clone(),
+            });
         })
         .await
         .expect("update");
@@ -68,7 +73,10 @@ async fn login_with_valid_credentials_sets_cookie() {
     let set_cookie = resp.headers().get("set-cookie");
     assert!(set_cookie.is_some(), "Expected Set-Cookie header");
     let cookie_val = set_cookie.unwrap().to_str().unwrap();
-    assert!(cookie_val.contains("agh_session="), "Expected agh_session cookie");
+    assert!(
+        cookie_val.contains("agh_session="),
+        "Expected agh_session cookie"
+    );
 }
 
 #[tokio::test]
@@ -78,12 +86,17 @@ async fn login_with_wrong_password_returns_403() {
     let dir = tempfile::tempdir().expect("tempdir");
     let cfg_path = dir.path().join("AdGuardHome.yaml");
     let config = std::sync::Arc::new(
-        agh_core::config_io::ConfigManager::load(&cfg_path).await.expect("load"),
+        agh_core::config_io::ConfigManager::load(&cfg_path)
+            .await
+            .expect("load"),
     );
     let hash = bcrypt::hash("correct_password", 4).expect("bcrypt hash");
     config
         .update(|cfg| {
-            cfg.users.push(User { name: "admin".to_owned(), password: hash });
+            cfg.users.push(User {
+                name: "admin".to_owned(),
+                password: hash,
+            });
         })
         .await
         .expect("update");
@@ -117,7 +130,10 @@ async fn logout_clears_session_cookie() {
         .await
         .unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
-    let set_cookie = resp.headers().get("set-cookie").map(|v| v.to_str().unwrap_or(""));
+    let set_cookie = resp
+        .headers()
+        .get("set-cookie")
+        .map(|v| v.to_str().unwrap_or(""));
     assert!(
         set_cookie.map(|c| c.contains("Max-Age=0")).unwrap_or(false),
         "logout must expire the session cookie"
@@ -145,4 +161,3 @@ async fn login_without_json_content_type_returns_error() {
         resp.status()
     );
 }
-

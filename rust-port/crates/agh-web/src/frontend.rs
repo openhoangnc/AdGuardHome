@@ -5,7 +5,7 @@
 //! directory does not exist (development mode without frontend build).
 
 use axum::body::Body;
-use axum::http::{header, Response, StatusCode, Uri};
+use axum::http::{Response, StatusCode, Uri, header};
 use axum::response::IntoResponse;
 
 // Embed the frontend build directory if it exists.
@@ -46,12 +46,21 @@ pub async fn serve_frontend(uri: Uri) -> impl IntoResponse {
 }
 
 fn mime_type(path: &str) -> &'static str {
-    if path.ends_with(".html") { "text/html; charset=utf-8" }
-    else if path.ends_with(".js") { "application/javascript" }
-    else if path.ends_with(".css") { "text/css" }
-    else if path.ends_with(".json") { "application/json" }
-    else if path.ends_with(".png") { "image/png" }
-    else if path.ends_with(".svg") { "image/svg+xml" }
-    else if path.ends_with(".ico") { "image/x-icon" }
-    else { "application/octet-stream" }
+    if path.ends_with(".html") {
+        "text/html; charset=utf-8"
+    } else if path.ends_with(".js") {
+        "application/javascript"
+    } else if path.ends_with(".css") {
+        "text/css"
+    } else if path.ends_with(".json") {
+        "application/json"
+    } else if path.ends_with(".png") {
+        "image/png"
+    } else if path.ends_with(".svg") {
+        "image/svg+xml"
+    } else if path.ends_with(".ico") {
+        "image/x-icon"
+    } else {
+        "application/octet-stream"
+    }
 }

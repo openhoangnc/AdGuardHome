@@ -30,7 +30,10 @@ async fn status_returns_json_with_required_fields() {
     assert!(body.get("running").is_some(), "missing 'running'");
     assert!(body.get("dns_port").is_some(), "missing 'dns_port'");
     assert!(body.get("http_port").is_some(), "missing 'http_port'");
-    assert!(body.get("protection_enabled").is_some(), "missing 'protection_enabled'");
+    assert!(
+        body.get("protection_enabled").is_some(),
+        "missing 'protection_enabled'"
+    );
     assert!(body.get("version").is_some(), "missing 'version'");
 }
 
@@ -41,8 +44,15 @@ async fn status_content_type_is_json() {
         .oneshot(Request::get("/control/status").body(Body::empty()).unwrap())
         .await
         .unwrap();
-    let ct = resp.headers().get("content-type").and_then(|v| v.to_str().ok()).unwrap_or("");
-    assert!(ct.contains("application/json"), "Content-Type should be JSON, got: {ct}");
+    let ct = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    assert!(
+        ct.contains("application/json"),
+        "Content-Type should be JSON, got: {ct}"
+    );
 }
 
 // ── GET /control/dns_info ─────────────────────────────────────────────────────
@@ -51,7 +61,11 @@ async fn status_content_type_is_json() {
 async fn dns_info_returns_200() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/dns_info").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/dns_info")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
@@ -61,13 +75,23 @@ async fn dns_info_returns_200() {
 async fn dns_info_returns_required_fields() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/dns_info").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/dns_info")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let body = common::body_json(resp.into_body()).await;
     assert!(body.get("upstream_dns").is_some(), "missing 'upstream_dns'");
-    assert!(body.get("filtering_enabled").is_some(), "missing 'filtering_enabled'");
-    assert!(body.get("protection_enabled").is_some(), "missing 'protection_enabled'");
+    assert!(
+        body.get("filtering_enabled").is_some(),
+        "missing 'filtering_enabled'"
+    );
+    assert!(
+        body.get("protection_enabled").is_some(),
+        "missing 'protection_enabled'"
+    );
 }
 
 // ── GET /control/version.json ─────────────────────────────────────────────────
@@ -76,7 +100,11 @@ async fn dns_info_returns_required_fields() {
 async fn version_returns_200() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/version.json").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/version.json")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
@@ -86,7 +114,11 @@ async fn version_returns_200() {
 async fn version_returns_required_fields() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/version.json").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/version.json")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let body = common::body_json(resp.into_body()).await;
@@ -100,7 +132,11 @@ async fn version_returns_required_fields() {
 async fn filtering_status_returns_200() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/filtering/status").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/filtering/status")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
@@ -110,7 +146,11 @@ async fn filtering_status_returns_200() {
 async fn filtering_status_returns_filters_array() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/filtering/status").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/filtering/status")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let body = common::body_json(resp.into_body()).await;

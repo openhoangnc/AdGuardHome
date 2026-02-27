@@ -22,10 +22,18 @@ pub struct ClientSourcesConfig {
     pub hosts: bool,
 }
 
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 impl Default for ClientSourcesConfig {
     fn default() -> Self {
-        Self { whois: true, arp: true, rdns: true, dhcp: true, hosts: true }
+        Self {
+            whois: true,
+            arp: true,
+            rdns: true,
+            dhcp: true,
+            hosts: true,
+        }
     }
 }

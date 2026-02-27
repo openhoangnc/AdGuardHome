@@ -17,8 +17,14 @@ impl SafeSearchRewriter {
         // Google — forcesafesearch.google.com
         let google_ip: IpAddr = "216.239.38.120".parse().expect("valid IP");
         for domain in &[
-            "google.com", "www.google.com", "google.co.uk", "www.google.co.uk",
-            "google.de", "www.google.de", "google.fr", "www.google.fr",
+            "google.com",
+            "www.google.com",
+            "google.co.uk",
+            "www.google.co.uk",
+            "google.de",
+            "www.google.de",
+            "google.fr",
+            "www.google.fr",
         ] {
             mappings.insert(domain.to_string(), google_ip);
         }

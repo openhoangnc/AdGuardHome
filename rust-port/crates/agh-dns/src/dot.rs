@@ -66,7 +66,10 @@ where
         }
 
         let mut msg_buf = vec![0u8; msg_len];
-        stream.read_exact(&mut msg_buf).await.map_err(DnsError::Io)?;
+        stream
+            .read_exact(&mut msg_buf)
+            .await
+            .map_err(DnsError::Io)?;
 
         let request = match Message::from_bytes(&msg_buf) {
             Ok(m) => m,
@@ -79,8 +82,14 @@ where
         };
 
         let resp_len = response_bytes.len() as u16;
-        stream.write_all(&resp_len.to_be_bytes()).await.map_err(DnsError::Io)?;
-        stream.write_all(&response_bytes).await.map_err(DnsError::Io)?;
+        stream
+            .write_all(&resp_len.to_be_bytes())
+            .await
+            .map_err(DnsError::Io)?;
+        stream
+            .write_all(&response_bytes)
+            .await
+            .map_err(DnsError::Io)?;
     }
     Ok(())
 }
@@ -88,10 +97,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_trait::async_trait;
     use hickory_proto::op::{Message, MessageType, OpCode, Query, ResponseCode};
     use hickory_proto::rr::{DNSClass, Name, RecordType};
     use hickory_proto::serialize::binary::{BinDecodable, BinEncodable};
-    use async_trait::async_trait;
 
     struct EchoHandler;
 
@@ -151,4 +160,3 @@ mod tests {
         server_task.await.unwrap().unwrap();
     }
 }
-

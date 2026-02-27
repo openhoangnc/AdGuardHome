@@ -1,5 +1,6 @@
-pub mod dns;
+pub mod clients;
 pub mod dhcp;
+pub mod dns;
 pub mod filter;
 pub mod http;
 pub mod log;
@@ -8,12 +9,12 @@ pub mod querylog;
 pub mod stats;
 pub mod tls;
 pub mod user;
-pub mod clients;
 
 use serde::{Deserialize, Serialize};
 
-pub use dns::DnsConfig;
+pub use clients::ClientsConfig;
 pub use dhcp::DhcpConfig;
+pub use dns::DnsConfig;
 pub use filter::FilterConfig;
 pub use http::HttpConfig;
 pub use log::LogConfig;
@@ -22,7 +23,6 @@ pub use querylog::QueryLogConfig;
 pub use stats::StatisticsConfig;
 pub use tls::TlsConfig;
 pub use user::User;
-pub use clients::ClientsConfig;
 
 /// Root configuration structure matching AdGuardHome.yaml schema exactly.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -76,9 +76,15 @@ pub struct AdGuardHomeConfig {
     pub querylog: QueryLogConfig,
 }
 
-fn default_schema_version() -> u32 { 28 }
-fn default_auth_attempts() -> u32 { 5 }
-fn default_block_auth_min() -> u32 { 15 }
+fn default_schema_version() -> u32 {
+    28
+}
+fn default_auth_attempts() -> u32 {
+    5
+}
+fn default_block_auth_min() -> u32 {
+    15
+}
 
 impl Default for AdGuardHomeConfig {
     fn default() -> Self {

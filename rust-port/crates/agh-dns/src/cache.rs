@@ -68,7 +68,13 @@ impl DnsCache {
             self.evict_expired_locked(&mut entries);
         }
 
-        entries.insert(key, CacheEntry { response, expires_at: Instant::now() + ttl });
+        entries.insert(
+            key,
+            CacheEntry {
+                response,
+                expires_at: Instant::now() + ttl,
+            },
+        );
     }
 
     /// Return the number of cached entries.
@@ -118,8 +124,8 @@ mod tests {
     use hickory_proto::op::{Message, MessageType, ResponseCode};
 
     fn make_query(name: &str) -> Message {
-        use hickory_proto::rr::{Name, RecordType, DNSClass};
         use hickory_proto::op::Query;
+        use hickory_proto::rr::{DNSClass, Name, RecordType};
         let mut msg = Message::new();
         msg.set_message_type(MessageType::Query);
         let mut q = Query::new();

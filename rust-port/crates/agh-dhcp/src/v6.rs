@@ -120,11 +120,15 @@ impl DhcpV6Server {
 pub fn build_dhcpv6_socket(interface_index: u32) -> Result<StdUdpSocket, crate::DhcpError> {
     let socket = Socket::new(Domain::IPV6, Type::DGRAM, Some(Protocol::UDP))
         .map_err(crate::DhcpError::Io)?;
-    socket.set_reuse_address(true).map_err(crate::DhcpError::Io)?;
+    socket
+        .set_reuse_address(true)
+        .map_err(crate::DhcpError::Io)?;
     socket.set_only_v6(true).map_err(crate::DhcpError::Io)?;
 
     let bind_addr = SocketAddrV6::new(Ipv6Addr::UNSPECIFIED, DHCPV6_SERVER_PORT, 0, 0);
-    socket.bind(&bind_addr.into()).map_err(crate::DhcpError::Io)?;
+    socket
+        .bind(&bind_addr.into())
+        .map_err(crate::DhcpError::Io)?;
 
     // Join the all-DHCP-servers multicast group on the specified interface.
     let _multicast_req = socket2::InterfaceIndexOrAddress::Index(interface_index);
@@ -230,4 +234,3 @@ mod tests {
         assert_eq!(u16::from_be_bytes([pkt[4], pkt[5]]), 3);
     }
 }
-

@@ -2,8 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
-const VERSION_URL_TEMPLATE: &str =
-    "https://static.adguard.com/adguardhome/{channel}/version.json";
+const VERSION_URL_TEMPLATE: &str = "https://static.adguard.com/adguardhome/{channel}/version.json";
 
 /// Version information from the update server.
 #[derive(Debug, Clone, Serialize, Deserialize)]

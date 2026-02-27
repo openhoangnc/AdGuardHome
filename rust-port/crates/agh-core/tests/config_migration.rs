@@ -35,7 +35,10 @@ fn typical_config_parses_successfully() {
     let config: AdGuardHomeConfig = serde_yaml::from_str(yaml).expect("parse typical config");
     assert_eq!(config.schema_version, 28);
     assert!(!config.users.is_empty(), "Expected at least one user");
-    assert!(!config.dns.upstream_dns.is_empty(), "Expected upstream DNS servers");
+    assert!(
+        !config.dns.upstream_dns.is_empty(),
+        "Expected upstream DNS servers"
+    );
     assert_eq!(config.dns.filtering_enabled, true);
 }
 
@@ -43,7 +46,10 @@ fn typical_config_parses_successfully() {
 fn typical_config_filters_preserved() {
     let yaml = include_str!("../../../tests/fixtures/configs/typical.yaml");
     let config: AdGuardHomeConfig = serde_yaml::from_str(yaml).unwrap();
-    assert!(!config.filters.is_empty(), "Expected at least one filter list");
+    assert!(
+        !config.filters.is_empty(),
+        "Expected at least one filter list"
+    );
     assert_eq!(config.filters[0].enabled, true);
     assert!(!config.filters[0].url.is_empty());
 }
@@ -149,5 +155,8 @@ dns:
 ";
     // serde_yaml ignores unknown fields by default (no #[serde(deny_unknown_fields)]).
     let result: Result<AdGuardHomeConfig, _> = serde_yaml::from_str(yaml);
-    assert!(result.is_ok(), "Unknown fields should not cause parse errors");
+    assert!(
+        result.is_ok(),
+        "Unknown fields should not cause parse errors"
+    );
 }

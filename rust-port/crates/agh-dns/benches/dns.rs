@@ -3,8 +3,8 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 
 use hickory_proto::op::{Message, MessageType, OpCode, Query, ResponseCode};
-use hickory_proto::rr::{DNSClass, Name, RData, Record, RecordType};
 use hickory_proto::rr::rdata::A;
+use hickory_proto::rr::{DNSClass, Name, RData, Record, RecordType};
 use hickory_proto::serialize::binary::BinEncodable;
 
 use agh_dns::cache::DnsCache;
@@ -84,5 +84,10 @@ fn bench_cache_miss(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_cache_insert, bench_cache_hit, bench_cache_miss);
+criterion_group!(
+    benches,
+    bench_cache_insert,
+    bench_cache_hit,
+    bench_cache_miss
+);
 criterion_main!(benches);

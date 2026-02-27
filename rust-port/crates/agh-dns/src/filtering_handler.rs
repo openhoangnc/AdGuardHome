@@ -32,7 +32,12 @@ impl FilteringHandler {
         safe_search: Arc<SafeSearchRewriter>,
         upstream: Arc<dyn QueryHandler>,
     ) -> Self {
-        Self { engine, safe_browsing, safe_search, upstream }
+        Self {
+            engine,
+            safe_browsing,
+            safe_search,
+            upstream,
+        }
     }
 }
 
@@ -121,7 +126,10 @@ mod tests {
     }
 
     fn make_handler(rules: &[&str]) -> FilteringHandler {
-        let parsed = rules.iter().filter_map(|s| agh_filtering::parser::parse_line(s)).collect();
+        let parsed = rules
+            .iter()
+            .filter_map(|s| agh_filtering::parser::parse_line(s))
+            .collect();
         let engine = Arc::new(FilteringEngine::build(parsed));
         let sb = Arc::new(SafeBrowsingChecker::new(false));
         let ss = Arc::new(SafeSearchRewriter::new(false));
