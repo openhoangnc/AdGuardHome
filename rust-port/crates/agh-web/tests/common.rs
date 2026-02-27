@@ -7,6 +7,8 @@ use agh_web::auth::SessionStore;
 use axum::Router;
 
 pub async fn test_app() -> Router {
+    // Install rustls ring provider once per test process (no-op if already installed).
+    let _ = rustls::crypto::ring::default_provider().install_default();
     let dir = tempfile::tempdir().expect("tempdir");
     let cfg_path = dir.path().join("AdGuardHome.yaml");
     // Leak so tempdir survives the test.

@@ -116,7 +116,6 @@ pub fn validate_cert(cert_pem: &str, key_pem: &str) -> CertInfo {
 
 /// Extract expiry information from the first (leaf) DER certificate.
 fn inspect_leaf(der: &CertificateDer<'_>) -> (String, bool, String) {
-    use rustls::pki_types::UnixTime;
 
     // Use rustls EndEntityCert for basic validation.
     // For a production implementation use the x509-parser crate for full ASN.1 parsing.
@@ -166,9 +165,14 @@ fn base64_decode(input: &str) -> Option<Vec<u8>> {
 mod tests {
     use super::*;
 
+    /// Install rustls ring provider once per test process.
+    fn init_crypto() {
+        let _ = rustls::crypto::ring::default_provider().install_default();
+    }
+
     /// Generate a self-signed certificate using rcgen for tests.
     fn make_self_signed(domains: &[&str]) -> (String, String) {
-        let mut params = rcgen::CertificateParams::new(
+        let params = rcgen::CertificateParams::new(
             domains.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
         )
         .expect("params");
@@ -194,6 +198,7 @@ mod tests {
 
     #[test]
     fn test_build_server_config_success() {
+        init_crypto();
         let (cert_pem, key_pem) = make_self_signed(&["localhost"]);
         let cfg = build_server_config(&cert_pem, &key_pem);
         assert!(cfg.is_ok(), "Expected Ok, got: {:?}", cfg.err());
@@ -201,6 +206,7 @@ mod tests {
 
     #[test]
     fn test_build_server_config_mismatched_key() {
+        init_crypto();
         let (cert_pem, _) = make_self_signed(&["host1.example.com"]);
         let (_, key_pem2) = make_self_signed(&["host2.example.com"]);
         // Different key → should fail
@@ -222,6 +228,7 @@ mod tests {
 
     #[test]
     fn test_validate_cert_valid_pair() {
+        init_crypto();
         let (cert_pem, key_pem) = make_self_signed(&["localhost"]);
         let info = validate_cert(&cert_pem, &key_pem);
         assert!(info.is_valid);

@@ -130,15 +130,14 @@ mod tests {
 
         let (mut cr, mut cw) = tokio::io::split(client);
 
-        // Write query + close write side (EOF ends the server loop).
+        // Run the server concurrently so write + read can interleave.
+        let server_task = tokio::spawn(handle_dot_connection(server, handler));
+
+        // Send the query frame then shut down the write half to signal EOF.
         cw.write_all(&frame).await.unwrap();
-        drop(cw);
+        cw.shutdown().await.unwrap();
 
-        // Run the server handler on the server side.
-        let result = handle_dot_connection(server, handler).await;
-        assert!(result.is_ok());
-
-        // Read the response from our client side.
+        // Read the response.
         let mut resp_len_buf = [0u8; 2];
         cr.read_exact(&mut resp_len_buf).await.unwrap();
         let resp_len = u16::from_be_bytes(resp_len_buf) as usize;
@@ -148,6 +147,8 @@ mod tests {
         let response = Message::from_bytes(&resp_buf).unwrap();
         assert_eq!(response.id(), 1234);
         assert_eq!(response.message_type(), MessageType::Response);
+
+        server_task.await.unwrap().unwrap();
     }
 }
 

@@ -4,7 +4,7 @@ use axum::extract::{Json, State};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use axum::Router;
-use axum::routing::{get, post, put};
+use axum::routing::{get, post};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -74,6 +74,8 @@ struct StatusResponse {
     is_running: bool,
     #[serde(rename = "language")]
     language: String,
+    #[serde(rename = "protection_enabled")]
+    protection_enabled: bool,
     #[serde(rename = "running")]
     running: bool,
     #[serde(rename = "version")]
@@ -137,6 +139,7 @@ async fn status_handler(State(state): State<AppState>) -> impl IntoResponse {
         http_port,
         is_running: true,
         language: "en".to_owned(),
+        protection_enabled: cfg.dns.filtering_enabled,
         running: true,
         version: env!("CARGO_PKG_VERSION").to_owned(),
         welcome_greeting: cfg.users.is_empty(),
@@ -148,6 +151,7 @@ async fn dns_info_handler(State(state): State<AppState>) -> impl IntoResponse {
     Json(json!({
         "upstream_dns": cfg.dns.upstream_dns,
         "bootstrap_dns": cfg.dns.bootstrap_dns,
+        "filtering_enabled": cfg.dns.filtering_enabled,
         "protection_enabled": cfg.dns.filtering_enabled,
         "ratelimit": 0,
         "blocking_mode": "default",

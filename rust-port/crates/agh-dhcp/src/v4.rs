@@ -6,10 +6,9 @@
 
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, UdpSocket as StdUdpSocket};
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use socket2::{Domain, Protocol, Socket, Type};
-use tokio::sync::RwLock;
 
 use crate::leases::{Lease, LeaseStore};
 
@@ -26,7 +25,7 @@ const BOOTP_OP: usize = 0;
 const BOOTP_HTYPE: usize = 1;
 const BOOTP_HLEN: usize = 2;
 const BOOTP_XID: usize = 4;
-const BOOTP_FLAGS: usize = 10;
+const _BOOTP_FLAGS: usize = 10;
 const BOOTP_CIADDR: usize = 12;
 const BOOTP_YIADDR: usize = 16;
 const BOOTP_SIADDR: usize = 20;
@@ -65,7 +64,7 @@ impl DhcpV4Server {
 
         let mut buf = [0u8; 1500];
         loop {
-            let (len, src) = socket.recv_from(&mut buf).map_err(crate::DhcpError::Io)?;
+            let (len, _src) = socket.recv_from(&mut buf).map_err(crate::DhcpError::Io)?;
             if len < BOOTP_OPTIONS + 4 {
                 continue;
             }

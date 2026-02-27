@@ -127,7 +127,7 @@ pub fn build_dhcpv6_socket(interface_index: u32) -> Result<StdUdpSocket, crate::
     socket.bind(&bind_addr.into()).map_err(crate::DhcpError::Io)?;
 
     // Join the all-DHCP-servers multicast group on the specified interface.
-    let multicast_req = socket2::InterfaceIndexOrAddress::Index(interface_index);
+    let _multicast_req = socket2::InterfaceIndexOrAddress::Index(interface_index);
     socket
         .join_multicast_v6(&ALL_DHCP_SERVERS, interface_index)
         .map_err(crate::DhcpError::Io)?;

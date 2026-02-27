@@ -94,7 +94,6 @@ fn synthetic_a_response(request: &Message, name: &Name, ip: IpAddr) -> Message {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use agh_filtering::parser::parse_filter;
     use hickory_proto::op::{Message, MessageType, Query};
     use hickory_proto::rr::{DNSClass, Name, RecordType};
 
