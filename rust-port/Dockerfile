@@ -12,10 +12,10 @@
 FROM node:24-alpine AS frontend
 WORKDIR /app
 COPY client/ ./client/
-COPY Makefile ./
+COPY Makefile .twosky.json ./
 # Install deps and build the SPA; skip if client/ doesn't exist yet.
 RUN if [ -d client ]; then \
-    cd client && npm ci --prefer-offline && npm run build; \
+    cd client && npm ci --prefer-offline && npm run build-prod; \
   else \
     mkdir -p build; \
   fi
