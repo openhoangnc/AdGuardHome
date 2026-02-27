@@ -84,12 +84,14 @@ sled           = "0.34"        # optional KV for stats/querylog
 Implement in dependency order — each crate must have unit tests before the next starts.
 
 ### 3.1 `agh-core` — Config & Shared Types (Week 3)
+
 - Implement `AdGuardHomeConfig` struct with `serde` matching **exact YAML field names** from Go (`dns`, `tls`, `filters`, `clients`, `http`, `os`, etc.)
 - Implement config read/write with atomic file writes (write to `.tmp`, rename)
 - Implement CLI argument parsing with `clap` — match all Go flags: `--config`, `--work-dir`, `--host`, `--port`, `--no-etc-hosts`, `--local-frontend`, `--service`
 - Implement `firstRun` detection (check if config file exists)
 
 ### 3.2 `agh-filtering` — DNS Filtering Engine (Week 4–5)
+
 - Parse AdBlock/hosts-format blocklists (port logic from `internal/filtering/`)
 - Implement rule matching: exact domain, wildcard `*.example.com`, regex rules
 - Implement safe browsing via hash-prefix DNS lookup (`sb.dns.adguard.com`)
@@ -99,6 +101,7 @@ Implement in dependency order — each crate must have unit tests before the nex
 - Blocklist auto-update scheduler with `tokio` timers
 
 ### 3.3 `agh-dns` — DNS Server (Week 5–7)
+
 - Build DNS server on `hickory-server` listening on UDP/TCP port 53
 - Implement DNS-over-HTTPS (DoH) server via axum handler at `GET/POST /dns-query`
 - Implement DNS-over-TLS (DoT) with `tokio-rustls`
@@ -112,6 +115,7 @@ Implement in dependency order — each crate must have unit tests before the nex
 - Implement DNS cache with TTL
 
 ### 3.4 `agh-dhcp` — DHCP Server (Week 6–7)
+
 - Implement DHCPv4 server (RFC 2131) using raw UDP sockets via `socket2`
 - Implement DHCPv6 server (RFC 3315)
 - Lease storage in YAML/JSON file (same schema as Go's `leases.db`)
@@ -119,12 +123,14 @@ Implement in dependency order — each crate must have unit tests before the nex
 - HTTP API handlers for DHCP (registered in `agh-web`)
 
 ### 3.5 `agh-stats` — Statistics (Week 7)
+
 - Circular buffer time-series stats stored in `redb` (matches Go's `internal/stats`)
 - Schema: queries per period, blocked queries, top clients, top domains, top blocked
 - Configurable retention window (1h, 24h, 7d, 30d, 90d)
 - JSON serialization matching Go's `GET /control/stats` response exactly
 
 ### 3.6 `agh-querylog` — Query Log (Week 7–8)
+
 - Append-only log with configurable size limit and retention
 - Persistent storage in JSON-lines file (matching Go's `querylog.json` + `querylog.json.1`)
 - Streaming response for `GET /control/querylog` with cursor-based pagination
@@ -132,9 +138,11 @@ Implement in dependency order — each crate must have unit tests before the nex
 - Filters: by client, domain, answer, blocked status
 
 ### 3.7 `agh-web` — HTTP API + Frontend (Week 8–9)
+
 This is the most critical module — every endpoint must be API-compatible.
 
 **Authentication:**
+
 - Session-based auth with `sessions.db` via `redb`
 - `POST /control/login`, `GET /control/logout`
 - Cookie: `agh_session` (same name as Go)
@@ -142,6 +150,7 @@ This is the most critical module — every endpoint must be API-compatible.
 - Trusted proxies support for `X-Forwarded-For`
 
 **Frontend serving:**
+
 ```rust
 // Embed the prebuilt frontend (build/ directory — never modified)
 #[derive(RustEmbed)]
@@ -182,6 +191,7 @@ async fn serve_frontend(uri: Uri) -> impl IntoResponse { ... }
 **JSON response validation:** Write an automated test that calls each endpoint and validates the response schema against the OpenAPI spec using `openapiv3` crate.
 
 ### 3.8 `agh-updater` — Self-Update (Week 9)
+
 - Fetch version info from `https://static.adguard.com/adguardhome/{channel}/version.json`
 - Download, verify checksum, extract tarball with `flate2` + `tar`
 - Atomic binary replacement
@@ -192,6 +202,7 @@ async fn serve_frontend(uri: Uri) -> impl IntoResponse { ... }
 ## Phase 4 — Service Management (Week 9)
 
 The Go backend uses the `service` library to install as a system service. Replicate with:
+
 - **Linux systemd**: generate `.service` unit file, call `systemctl enable/start/stop`
 - **macOS launchd**: generate `.plist`, call `launchctl`
 - **Windows SCM**: use `windows-service` crate
@@ -212,7 +223,7 @@ COPY Makefile ./
 RUN cd client && npm ci && npm run build
 
 # ── Stage 2: Build Rust backend (multi-arch via cross-compilation) ────────
-FROM --platform=$BUILDPLATFORM rust:1.82-alpine AS rust-builder
+FROM --platform=$BUILDPLATFORM rust:1.93-alpine AS rust-builder
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
@@ -276,6 +287,7 @@ docker buildx build \
 ## Phase 6 — Testing & Validation (Week 10–12)
 
 ### Compatibility Testing Strategy
+
 1. **API contract tests**: Run the existing Playwright E2E frontend tests against the Rust backend — all must pass with zero frontend changes.
 2. **Config migration test**: Take real `AdGuardHome.yaml` files from production Go deployments and verify the Rust binary reads/writes them identically.
 3. **DNS compliance tests**: Use `dnscompliance` and `q` tool to test DoH/DoT/DoQ/DNSCrypt endpoints.

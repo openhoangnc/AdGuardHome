@@ -21,7 +21,7 @@ RUN if [ -d client ]; then \
   fi
 
 # ── Stage 2: Rust Backend ──────────────────────────────────────────────────
-FROM --platform=$BUILDPLATFORM rust:1.82-alpine AS rust-builder
+FROM --platform=$BUILDPLATFORM rust:1.93-alpine AS rust-builder
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 

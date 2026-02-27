@@ -1,15 +1,19 @@
 # TASK-41: Multi-Arch Dockerfile
 
 ## Status
+
 ⬜ TODO
 
 ## Phase
+
 Phase 11 — Docker & CI
 
 ## Dependencies
+
 - TASK-40 ✅ (complete binary builds successfully)
 
 ## Objective
+
 Create the production Dockerfile with multi-arch support (`linux/amd64`, `linux/arm64`, `linux/arm/v7`, `linux/arm/v6`, `linux/386`, `linux/ppc64le`, `linux/s390x`). Port from the existing `docker/` directory approach, replacing the Go builder stage with Rust.
 
 ---
@@ -19,6 +23,7 @@ Create the production Dockerfile with multi-arch support (`linux/amd64`, `linux/
 - [ ] Create `rust-port/Dockerfile` with 3 stages:
 
   **Stage 1 — Frontend** (unchanged from Go version, Node.js):
+
   ```dockerfile
   FROM node:24-alpine AS frontend
   WORKDIR /app
@@ -28,8 +33,9 @@ Create the production Dockerfile with multi-arch support (`linux/amd64`, `linux/
   ```
 
   **Stage 2 — Rust Backend** (cross-compilation):
+
   ```dockerfile
-  FROM --platform=$BUILDPLATFORM rust:1.82-alpine AS rust-builder
+  FROM --platform=$BUILDPLATFORM rust:1.93-alpine AS rust-builder
   ARG TARGETPLATFORM
   RUN apk add --no-cache musl-dev gcc g++ make perl git
   WORKDIR /build
@@ -53,6 +59,7 @@ Create the production Dockerfile with multi-arch support (`linux/amd64`, `linux/
   ```
 
   **Stage 3 — Final minimal image**:
+
   ```dockerfile
   FROM alpine:3.20
   RUN apk add --no-cache ca-certificates tzdata libcap && \
@@ -66,6 +73,7 @@ Create the production Dockerfile with multi-arch support (`linux/amd64`, `linux/
   ```
 
 - [ ] Create `rust-port/docker-buildx.sh`:
+
   ```bash
   #!/usr/bin/env bash
   set -euo pipefail
@@ -78,12 +86,14 @@ Create the production Dockerfile with multi-arch support (`linux/amd64`, `linux/
     -f rust-port/Dockerfile \
     .
   ```
+
 - [ ] Create `.dockerignore` excluding `target/`, `client/node_modules/`, `.git/`
 - [ ] Layer caching optimization: copy `Cargo.toml`/`Cargo.lock` first, build empty project to cache dependencies, then copy source
 
 ---
 
 ## Verification
+
 ```bash
 # Single-arch test (fast):
 docker build -f rust-port/Dockerfile -t adguardhome-rust:test .
@@ -95,6 +105,7 @@ bash rust-port/docker-buildx.sh
 ---
 
 ## Output Files
+
 - `rust-port/Dockerfile`
 - `rust-port/docker-buildx.sh`
 - `.dockerignore` (update or create)
