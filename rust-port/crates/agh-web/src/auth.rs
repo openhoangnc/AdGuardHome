@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use axum::http::{header, HeaderMap};
+use axum::http::{HeaderMap, header};
 use uuid::Uuid;
 
 const SESSION_COOKIE: &str = "agh_session";
@@ -22,7 +22,9 @@ pub struct SessionStore {
 
 impl SessionStore {
     pub fn new() -> Self {
-        Self { sessions: Arc::new(Mutex::new(HashMap::new())) }
+        Self {
+            sessions: Arc::new(Mutex::new(HashMap::new())),
+        }
     }
 
     /// Create a new session for the given user. Returns the session token.
@@ -31,7 +33,10 @@ impl SessionStore {
         let mut sessions = self.sessions.lock().expect("lock poisoned");
         sessions.insert(
             token.clone(),
-            Session { username: username.to_owned(), expires_at: Instant::now() + SESSION_TTL },
+            Session {
+                username: username.to_owned(),
+                expires_at: Instant::now() + SESSION_TTL,
+            },
         );
         token
     }
@@ -55,7 +60,10 @@ impl SessionStore {
     /// Purge all expired sessions.
     pub fn purge_expired(&self) {
         let now = Instant::now();
-        self.sessions.lock().expect("lock poisoned").retain(|_, v| v.expires_at > now);
+        self.sessions
+            .lock()
+            .expect("lock poisoned")
+            .retain(|_, v| v.expires_at > now);
     }
 }
 
@@ -121,7 +129,10 @@ mod tests {
                 .parse()
                 .unwrap(),
         );
-        assert_eq!(extract_session_token(&headers), Some("mytoken123".to_owned()));
+        assert_eq!(
+            extract_session_token(&headers),
+            Some("mytoken123".to_owned())
+        );
     }
 
     #[test]

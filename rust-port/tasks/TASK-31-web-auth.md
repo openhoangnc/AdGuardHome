@@ -30,10 +30,10 @@ Implement session-based authentication using `redb` as the session store. Replic
 
       /// Validate credentials, create session, return session token
       pub fn login(&self, username: &str, password: &str, client_ip: IpAddr) -> Result<SessionToken, AuthError>;
-      
+
       /// Validate session token, return user info
       pub fn validate_session(&self, token: &str) -> Option<User>;
-      
+
       pub fn logout(&self, token: &str);
   }
   ```

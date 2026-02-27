@@ -42,12 +42,12 @@ Measure and document performance metrics. The Rust binary should show ≥2x high
   // k6 load test for HTTP + DNS (via DoH)
   import http from 'k6/http';
   import { check, sleep } from 'k6';
-  
+
   export const options = {
     vus: 100,
     duration: '30s',
   };
-  
+
   export default function () {
     const resp = http.get('http://localhost:3000/control/status');
     check(resp, { 'status 200': (r) => r.status === 200 });

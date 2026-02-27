@@ -27,7 +27,7 @@ Embed the prebuilt frontend (`build/` directory) and serve it as a SPA at `/`. T
   /// Axum route handler for frontend assets
   pub async fn serve_asset(uri: Uri) -> impl IntoResponse {
       let path = uri.path().trim_start_matches('/');
-      
+
       // Try exact path first
       if let Some(asset) = ClientAssets::get(path) {
           return Response::builder()
@@ -36,7 +36,7 @@ Embed the prebuilt frontend (`build/` directory) and serve it as a SPA at `/`. T
               .body(Body::from(asset.data))
               .unwrap();
       }
-      
+
       // SPA fallback: serve index.html for any non-asset path
       let index = ClientAssets::get("index.html").unwrap();
       Response::builder()

@@ -14,9 +14,15 @@ pub struct QueryLogConfig {
     pub interval: String,
 }
 
-fn default_true() -> bool { true }
-fn default_size_mb() -> u64 { 100 }
-fn default_interval() -> String { "90d".to_string() }
+fn default_true() -> bool {
+    true
+}
+fn default_size_mb() -> u64 {
+    100
+}
+fn default_interval() -> String {
+    "90d".to_string()
+}
 
 impl Default for QueryLogConfig {
     fn default() -> Self {

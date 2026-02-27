@@ -48,8 +48,7 @@ pub struct CertInfo {
 pub fn parse_cert_chain(pem: &str) -> Result<Vec<CertificateDer<'static>>, TlsError> {
     let pem = decode_if_base64(pem);
     let mut cursor = Cursor::new(pem.as_bytes());
-    let chain: Vec<CertificateDer<'static>> =
-        certs(&mut cursor).collect::<Result<_, _>>()?;
+    let chain: Vec<CertificateDer<'static>> = certs(&mut cursor).collect::<Result<_, _>>()?;
     if chain.is_empty() {
         return Err(TlsError::EmptyCert);
     }
@@ -60,8 +59,7 @@ pub fn parse_cert_chain(pem: &str) -> Result<Vec<CertificateDer<'static>>, TlsEr
 pub fn parse_private_key(pem: &str) -> Result<PrivateKeyDer<'static>, TlsError> {
     let pem = decode_if_base64(pem);
     let mut cursor = Cursor::new(pem.as_bytes());
-    private_key(&mut cursor)?
-        .ok_or(TlsError::EmptyKey)
+    private_key(&mut cursor)?.ok_or(TlsError::EmptyKey)
 }
 
 /// Build a `rustls::ServerConfig` from PEM-encoded cert chain and private key.
@@ -116,14 +114,16 @@ pub fn validate_cert(cert_pem: &str, key_pem: &str) -> CertInfo {
 
 /// Extract expiry information from the first (leaf) DER certificate.
 fn inspect_leaf(der: &CertificateDer<'_>) -> (String, bool, String) {
-    use rustls::pki_types::UnixTime;
-
     // Use rustls EndEntityCert for basic validation.
     // For a production implementation use the x509-parser crate for full ASN.1 parsing.
     // Here we return a placeholder — the key correctness check is done by build_server_config.
     let not_after = "unknown".to_string();
     let is_valid = !der.as_ref().is_empty();
-    let warning = if is_valid { String::new() } else { "Could not parse certificate".to_owned() };
+    let warning = if is_valid {
+        String::new()
+    } else {
+        "Could not parse certificate".to_owned()
+    };
     (not_after, is_valid, warning)
 }
 
@@ -143,8 +143,7 @@ fn decode_if_base64(s: &str) -> String {
 }
 
 fn base64_decode(input: &str) -> Option<Vec<u8>> {
-    const CHARS: &[u8] =
-        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let input = input.replace(['\n', '\r', ' '], "");
     let input = input.trim_end_matches('=');
     let mut out = Vec::with_capacity(input.len() * 3 / 4);
@@ -166,9 +165,14 @@ fn base64_decode(input: &str) -> Option<Vec<u8>> {
 mod tests {
     use super::*;
 
+    /// Install rustls ring provider once per test process.
+    fn init_crypto() {
+        let _ = rustls::crypto::ring::default_provider().install_default();
+    }
+
     /// Generate a self-signed certificate using rcgen for tests.
     fn make_self_signed(domains: &[&str]) -> (String, String) {
-        let mut params = rcgen::CertificateParams::new(
+        let params = rcgen::CertificateParams::new(
             domains.iter().map(|s| s.to_string()).collect::<Vec<_>>(),
         )
         .expect("params");
@@ -194,6 +198,7 @@ mod tests {
 
     #[test]
     fn test_build_server_config_success() {
+        init_crypto();
         let (cert_pem, key_pem) = make_self_signed(&["localhost"]);
         let cfg = build_server_config(&cert_pem, &key_pem);
         assert!(cfg.is_ok(), "Expected Ok, got: {:?}", cfg.err());
@@ -201,6 +206,7 @@ mod tests {
 
     #[test]
     fn test_build_server_config_mismatched_key() {
+        init_crypto();
         let (cert_pem, _) = make_self_signed(&["host1.example.com"]);
         let (_, key_pem2) = make_self_signed(&["host2.example.com"]);
         // Different key → should fail
@@ -222,6 +228,7 @@ mod tests {
 
     #[test]
     fn test_validate_cert_valid_pair() {
+        init_crypto();
         let (cert_pem, key_pem) = make_self_signed(&["localhost"]);
         let info = validate_cert(&cert_pem, &key_pem);
         assert!(info.is_valid);

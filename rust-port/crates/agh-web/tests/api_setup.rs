@@ -17,7 +17,11 @@ use tower::ServiceExt;
 async fn install_get_addresses_returns_200() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/install/get_addresses").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/install/get_addresses")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
@@ -27,7 +31,11 @@ async fn install_get_addresses_returns_200() {
 async fn install_get_addresses_returns_interfaces() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/install/get_addresses").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/install/get_addresses")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let body = common::body_json(resp.into_body()).await;

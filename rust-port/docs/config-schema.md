@@ -1,6 +1,6 @@
 # Config YAML Schema Audit — AdGuardHome Rust Port
 
-> **Source**: `internal/home/config.go`, `internal/dnsforward/config.go`, etc.  
+> **Source**: `internal/home/config.go`, `internal/dnsforward/config.go`, etc.
 > **Purpose**: Authoritative mapping for TASK-06 (`AdGuardHomeConfig` serde annotations)
 
 ---

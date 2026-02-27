@@ -1,17 +1,17 @@
 use std::sync::Arc;
 
-use axum::extract::{Json, State};
-use axum::http::{header, HeaderMap, StatusCode};
-use axum::response::IntoResponse;
 use axum::Router;
-use axum::routing::{get, post, put};
+use axum::extract::{Json, State};
+use axum::http::{HeaderMap, StatusCode, header};
+use axum::response::IntoResponse;
+use axum::routing::{get, post};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use agh_core::config::tls::TlsConfig;
 use agh_core::config_io::ConfigManager;
 
-use crate::auth::{extract_session_token, make_session_cookie, SessionStore};
+use crate::auth::{SessionStore, extract_session_token, make_session_cookie};
 use crate::tls_config::validate_cert;
 
 /// Shared application state.
@@ -74,6 +74,8 @@ struct StatusResponse {
     is_running: bool,
     #[serde(rename = "language")]
     language: String,
+    #[serde(rename = "protection_enabled")]
+    protection_enabled: bool,
     #[serde(rename = "running")]
     running: bool,
     #[serde(rename = "version")]
@@ -107,24 +109,32 @@ async fn login_handler(
         )
             .into_response()
     } else {
-        (StatusCode::FORBIDDEN, Json(json!({"message": "invalid credentials"}))).into_response()
+        (
+            StatusCode::FORBIDDEN,
+            Json(json!({"message": "invalid credentials"})),
+        )
+            .into_response()
     }
 }
 
-async fn logout_handler(
-    State(state): State<AppState>,
-    _headers: HeaderMap,
-) -> impl IntoResponse {
+async fn logout_handler(State(state): State<AppState>, _headers: HeaderMap) -> impl IntoResponse {
     if let Some(token) = extract_session_token(&_headers) {
         state.sessions.remove(&token);
     }
     let clear_cookie = "agh_session=; Max-Age=0; Path=/".to_string();
-    (StatusCode::OK, [(header::SET_COOKIE, clear_cookie)], Json(json!({}))).into_response()
+    (
+        StatusCode::OK,
+        [(header::SET_COOKIE, clear_cookie)],
+        Json(json!({})),
+    )
+        .into_response()
 }
 
 async fn status_handler(State(state): State<AppState>) -> impl IntoResponse {
     let cfg = state.config.get_async().await;
-    let http_port: u16 = cfg.http.address
+    let http_port: u16 = cfg
+        .http
+        .address
         .rsplit(':')
         .next()
         .and_then(|p| p.parse().ok())
@@ -137,6 +147,7 @@ async fn status_handler(State(state): State<AppState>) -> impl IntoResponse {
         http_port,
         is_running: true,
         language: "en".to_owned(),
+        protection_enabled: cfg.dns.filtering_enabled,
         running: true,
         version: env!("CARGO_PKG_VERSION").to_owned(),
         welcome_greeting: cfg.users.is_empty(),
@@ -148,6 +159,7 @@ async fn dns_info_handler(State(state): State<AppState>) -> impl IntoResponse {
     Json(json!({
         "upstream_dns": cfg.dns.upstream_dns,
         "bootstrap_dns": cfg.dns.bootstrap_dns,
+        "filtering_enabled": cfg.dns.filtering_enabled,
         "protection_enabled": cfg.dns.filtering_enabled,
         "ratelimit": 0,
         "blocking_mode": "default",
@@ -187,10 +199,10 @@ async fn install_get_addresses_handler() -> impl IntoResponse {
     }))
 }
 
-async fn install_check_config_handler(
-    Json(_body): Json<serde_json::Value>,
-) -> impl IntoResponse {
-    Json(json!({"dns": {"status": "", "can_autofix": false}, "web": {"status": "", "can_autofix": false}}))
+async fn install_check_config_handler(Json(_body): Json<serde_json::Value>) -> impl IntoResponse {
+    Json(
+        json!({"dns": {"status": "", "can_autofix": false}, "web": {"status": "", "can_autofix": false}}),
+    )
 }
 
 async fn install_configure_handler(
@@ -233,9 +245,15 @@ struct TlsConfigRequest {
     private_key: String,
 }
 
-fn default_port_https() -> u16 { 443 }
-fn default_port_dot() -> u16 { 853 }
-fn default_port_doq() -> u16 { 784 }
+fn default_port_https() -> u16 {
+    443
+}
+fn default_port_dot() -> u16 {
+    853
+}
+fn default_port_doq() -> u16 {
+    784
+}
 
 fn tls_status_json(tls: &TlsConfig) -> serde_json::Value {
     let info = validate_cert(&tls.certificate_chain, &tls.private_key);
@@ -280,21 +298,27 @@ async fn tls_configure_handler(
         .await
         .map(|_| {
             let info = validate_cert(&body.certificate_chain, &body.private_key);
-            (StatusCode::OK, Json(json!({
-                "valid_cert": info.is_valid,
-                "valid_key": info.valid_key,
-                "valid_pair": info.valid_pair,
-                "warning_validation": info.warning,
-            }))).into_response()
+            (
+                StatusCode::OK,
+                Json(json!({
+                    "valid_cert": info.is_valid,
+                    "valid_key": info.valid_key,
+                    "valid_pair": info.valid_pair,
+                    "warning_validation": info.warning,
+                })),
+            )
+                .into_response()
         })
         .unwrap_or_else(|e| {
-            (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"message": e.to_string()}))).into_response()
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"message": e.to_string()})),
+            )
+                .into_response()
         })
 }
 
-async fn tls_validate_handler(
-    Json(body): Json<TlsConfigRequest>,
-) -> impl IntoResponse {
+async fn tls_validate_handler(Json(body): Json<TlsConfigRequest>) -> impl IntoResponse {
     let info = validate_cert(&body.certificate_chain, &body.private_key);
     Json(json!({
         "enabled": body.enabled,
@@ -310,15 +334,17 @@ async fn tls_validate_handler(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use axum::http::Request;
     use axum::body::Body;
+    use axum::http::Request;
     use tower::ServiceExt;
 
     async fn test_state() -> AppState {
         let dir = tempfile::tempdir().expect("tempdir");
         let cfg_path = dir.path().join("AdGuardHome.yaml");
         let config = Arc::new(
-            agh_core::config_io::ConfigManager::load(&cfg_path).await.expect("load")
+            agh_core::config_io::ConfigManager::load(&cfg_path)
+                .await
+                .expect("load"),
         );
         AppState {
             config,
@@ -342,7 +368,11 @@ mod tests {
         let state = test_state().await;
         let app = create_router(state);
         let response = app
-            .oneshot(Request::get("/control/dns_info").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::get("/control/dns_info")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
@@ -353,7 +383,11 @@ mod tests {
         let state = test_state().await;
         let app = create_router(state);
         let response = app
-            .oneshot(Request::get("/control/version.json").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::get("/control/version.json")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
@@ -364,7 +398,11 @@ mod tests {
         let state = test_state().await;
         let app = create_router(state);
         let response = app
-            .oneshot(Request::get("/control/tls/status").body(Body::empty()).unwrap())
+            .oneshot(
+                Request::get("/control/tls/status")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
@@ -389,7 +427,9 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK);
-        let bytes = axum::body::to_bytes(response.into_body(), usize::MAX).await.unwrap();
+        let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
         let json: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
         assert_eq!(json["valid_pair"], false);
     }

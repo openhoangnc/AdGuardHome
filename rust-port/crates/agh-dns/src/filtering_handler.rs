@@ -32,7 +32,12 @@ impl FilteringHandler {
         safe_search: Arc<SafeSearchRewriter>,
         upstream: Arc<dyn QueryHandler>,
     ) -> Self {
-        Self { engine, safe_browsing, safe_search, upstream }
+        Self {
+            engine,
+            safe_browsing,
+            safe_search,
+            upstream,
+        }
     }
 }
 
@@ -94,7 +99,6 @@ fn synthetic_a_response(request: &Message, name: &Name, ip: IpAddr) -> Message {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use agh_filtering::parser::parse_filter;
     use hickory_proto::op::{Message, MessageType, Query};
     use hickory_proto::rr::{DNSClass, Name, RecordType};
 
@@ -122,7 +126,10 @@ mod tests {
     }
 
     fn make_handler(rules: &[&str]) -> FilteringHandler {
-        let parsed = rules.iter().filter_map(|s| agh_filtering::parser::parse_line(s)).collect();
+        let parsed = rules
+            .iter()
+            .filter_map(|s| agh_filtering::parser::parse_line(s))
+            .collect();
         let engine = Arc::new(FilteringEngine::build(parsed));
         let sb = Arc::new(SafeBrowsingChecker::new(false));
         let ss = Arc::new(SafeSearchRewriter::new(false));

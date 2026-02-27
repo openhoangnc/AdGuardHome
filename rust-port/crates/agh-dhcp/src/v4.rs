@@ -6,10 +6,9 @@
 
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4, UdpSocket as StdUdpSocket};
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use socket2::{Domain, Protocol, Socket, Type};
-use tokio::sync::RwLock;
 
 use crate::leases::{Lease, LeaseStore};
 
@@ -26,7 +25,7 @@ const BOOTP_OP: usize = 0;
 const BOOTP_HTYPE: usize = 1;
 const BOOTP_HLEN: usize = 2;
 const BOOTP_XID: usize = 4;
-const BOOTP_FLAGS: usize = 10;
+const _BOOTP_FLAGS: usize = 10;
 const BOOTP_CIADDR: usize = 12;
 const BOOTP_YIADDR: usize = 16;
 const BOOTP_SIADDR: usize = 20;
@@ -65,7 +64,7 @@ impl DhcpV4Server {
 
         let mut buf = [0u8; 1500];
         loop {
-            let (len, src) = socket.recv_from(&mut buf).map_err(crate::DhcpError::Io)?;
+            let (len, _src) = socket.recv_from(&mut buf).map_err(crate::DhcpError::Io)?;
             if len < BOOTP_OPTIONS + 4 {
                 continue;
             }
@@ -111,7 +110,11 @@ impl DhcpV4Server {
                 }
                 DHCP_REQUEST => {
                     let offered_ip = self.allocate_ip(&mac).await;
-                    let reply_type = if offered_ip.is_some() { DHCP_ACK } else { DHCP_NAK };
+                    let reply_type = if offered_ip.is_some() {
+                        DHCP_ACK
+                    } else {
+                        DHCP_NAK
+                    };
                     let ip = offered_ip.unwrap_or(Ipv4Addr::UNSPECIFIED);
                     let reply = build_reply(reply_type, xid, ip, &self.config);
                     let _ = socket.send_to(&reply, "255.255.255.255:68");
@@ -179,7 +182,9 @@ impl DhcpV4Server {
 pub fn build_dhcp_socket(addr: &str) -> Result<StdUdpSocket, crate::DhcpError> {
     let socket = Socket::new(Domain::IPV4, Type::DGRAM, Some(Protocol::UDP))
         .map_err(crate::DhcpError::Io)?;
-    socket.set_reuse_address(true).map_err(crate::DhcpError::Io)?;
+    socket
+        .set_reuse_address(true)
+        .map_err(crate::DhcpError::Io)?;
     socket.set_broadcast(true).map_err(crate::DhcpError::Io)?;
     let addr: std::net::SocketAddr = addr
         .parse()
@@ -299,7 +304,12 @@ mod tests {
             range_end: Ipv4Addr::new(192, 168, 1, 200),
             lease_duration: Duration::from_secs(86400),
         };
-        let reply = build_reply(DHCP_OFFER, [0, 0, 0, 1], Ipv4Addr::new(192, 168, 1, 100), &cfg);
+        let reply = build_reply(
+            DHCP_OFFER,
+            [0, 0, 0, 1],
+            Ipv4Addr::new(192, 168, 1, 100),
+            &cfg,
+        );
         assert_eq!(&reply[BOOTP_OPTIONS..BOOTP_OPTIONS + 4], &DHCP_MAGIC_COOKIE);
         assert_eq!(reply[BOOTP_OP], 2); // BOOTREPLY
     }
@@ -322,4 +332,3 @@ mod tests {
         assert_eq!(reply[opt_start + 2], DHCP_ACK); // value
     }
 }
-

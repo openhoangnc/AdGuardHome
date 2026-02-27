@@ -2,11 +2,13 @@
 
 use std::sync::Arc;
 
-use agh_web::routes::AppState;
 use agh_web::auth::SessionStore;
+use agh_web::routes::AppState;
 use axum::Router;
 
 pub async fn test_app() -> Router {
+    // Install rustls ring provider once per test process (no-op if already installed).
+    let _ = rustls::crypto::ring::default_provider().install_default();
     let dir = tempfile::tempdir().expect("tempdir");
     let cfg_path = dir.path().join("AdGuardHome.yaml");
     // Leak so tempdir survives the test.
@@ -16,7 +18,10 @@ pub async fn test_app() -> Router {
             .await
             .expect("load config"),
     );
-    let state = AppState { config, sessions: Arc::new(SessionStore::new()) };
+    let state = AppState {
+        config,
+        sessions: Arc::new(SessionStore::new()),
+    };
     agh_web::create_router(state)
 }
 

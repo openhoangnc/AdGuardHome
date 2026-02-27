@@ -47,13 +47,13 @@ Implement a TTL-respecting DNS response cache. This reduces upstream load and la
 
   impl DnsCache {
       pub fn new(config: CacheConfig) -> Self;
-      
+
       /// Look up a cached response, decrementing TTL by elapsed time
       pub fn get(&self, key: &CacheKey) -> Option<DnsResponse>;
-      
+
       /// Store a response (only if it has at least one record with TTL > 0)
       pub fn put(&self, key: CacheKey, response: DnsResponse);
-      
+
       pub fn clear(&self);
       pub fn len(&self) -> usize;
   }

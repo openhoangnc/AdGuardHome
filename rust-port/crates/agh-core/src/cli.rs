@@ -77,8 +77,7 @@ pub fn parse() -> Cli {
 /// Initialise the tracing subscriber.
 pub fn init_tracing(verbose: bool, _logfile: Option<&Path>) {
     let level = if verbose { "debug" } else { "info" };
-    let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new(level));
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(level));
     tracing_subscriber::fmt().with_env_filter(filter).init();
 }
 
@@ -105,7 +104,9 @@ mod tests {
         let cli = Cli::parse_from(["adguardhome", "service", "install"]);
         assert!(matches!(
             cli.service,
-            Some(ServiceCommand::Service { action: ServiceAction::Install })
+            Some(ServiceCommand::Service {
+                action: ServiceAction::Install
+            })
         ));
     }
 
@@ -120,6 +121,9 @@ mod tests {
             "--no-check-update",
         ]);
         assert!(cli.no_check_update);
-        assert_eq!(cli.config, PathBuf::from("/opt/adguardhome/conf/AdGuardHome.yaml"));
+        assert_eq!(
+            cli.config,
+            PathBuf::from("/opt/adguardhome/conf/AdGuardHome.yaml")
+        );
     }
 }

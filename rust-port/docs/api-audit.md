@@ -1,7 +1,7 @@
 # API Contract Audit — AdGuardHome Rust Port
 
-> **Generated**: 2026-02-26  
-> **Source**: `openapi/openapi.yaml` + `internal/home/` Go source files  
+> **Generated**: 2026-02-26
+> **Source**: `openapi/openapi.yaml` + `internal/home/` Go source files
 > **Total endpoints**: 81 (all under `/control` prefix)
 
 ---

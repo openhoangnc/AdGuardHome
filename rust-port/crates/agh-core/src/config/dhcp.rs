@@ -44,7 +44,9 @@ pub struct DhcpV4Config {
     pub options: Vec<String>,
 }
 
-fn default_lease_duration() -> u64 { 86400 }
+fn default_lease_duration() -> u64 {
+    86400
+}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DhcpV6Config {
@@ -58,4 +60,6 @@ pub struct DhcpV6Config {
     pub ra_slaac_only: bool,
 }
 
-fn default_ra_allow_slaac() -> bool { false }
+fn default_ra_allow_slaac() -> bool {
+    false
+}

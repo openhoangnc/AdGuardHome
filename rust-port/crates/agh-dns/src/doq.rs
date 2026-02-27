@@ -90,7 +90,6 @@ async fn handle_doq_stream<H: QueryHandler + Send + Sync>(
 ) {
     use hickory_proto::op::Message;
     use hickory_proto::serialize::binary::{BinDecodable, BinEncodable};
-    use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
     // Read 2-byte length prefix.
     let mut len_buf = [0u8; 2];
@@ -135,4 +134,3 @@ mod tests {
         let _ = stringify!(super::add_doq_alpn);
     }
 }
-

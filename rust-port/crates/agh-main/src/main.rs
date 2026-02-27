@@ -11,7 +11,10 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     agh_core::cli::init_tracing(cli.verbose, cli.logfile.as_deref());
 
-    tracing::info!("AdGuardHome starting (Rust port) v{}", env!("CARGO_PKG_VERSION"));
+    tracing::info!(
+        "AdGuardHome starting (Rust port) v{}",
+        env!("CARGO_PKG_VERSION")
+    );
 
     // Load configuration.
     let config = Arc::new(ConfigManager::load(&cli.config).await?);
@@ -30,7 +33,10 @@ async fn main() -> anyhow::Result<()> {
         let cfg = config.get_async().await;
         if let Some(host) = cli.host {
             let port = cli.port.unwrap_or_else(|| {
-                cfg.http.address.rsplit(':').next()
+                cfg.http
+                    .address
+                    .rsplit(':')
+                    .next()
                     .and_then(|p| p.parse().ok())
                     .unwrap_or(3000)
             });
@@ -77,4 +83,3 @@ async fn shutdown_signal() {
 
     tracing::info!("Shutting down...");
 }
-

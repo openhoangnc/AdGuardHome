@@ -15,7 +15,11 @@ use tower::ServiceExt;
 async fn tls_status_returns_200() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/tls/status").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/tls/status")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     assert_eq!(resp.status(), StatusCode::OK);
@@ -25,12 +29,24 @@ async fn tls_status_returns_200() {
 async fn tls_status_returns_required_fields() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/tls/status").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/tls/status")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let body = common::body_json(resp.into_body()).await;
-    for field in &["enabled", "server_name", "port_https", "port_dns_over_tls",
-                   "valid_cert", "valid_key", "valid_pair", "warning_validation"] {
+    for field in &[
+        "enabled",
+        "server_name",
+        "port_https",
+        "port_dns_over_tls",
+        "valid_cert",
+        "valid_key",
+        "valid_pair",
+        "warning_validation",
+    ] {
         assert!(body.get(field).is_some(), "missing '{field}'");
     }
 }
@@ -39,7 +55,11 @@ async fn tls_status_returns_required_fields() {
 async fn tls_status_disabled_by_default() {
     let app = common::test_app().await;
     let resp = app
-        .oneshot(Request::get("/control/tls/status").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::get("/control/tls/status")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
     let body = common::body_json(resp.into_body()).await;
@@ -125,7 +145,10 @@ async fn tls_validate_mismatched_key_returns_invalid_pair() {
     let json = common::body_json(resp.into_body()).await;
     // Key is valid on its own, but the pair doesn't match.
     assert_eq!(json["valid_key"], true, "key itself is valid");
-    assert_eq!(json["valid_pair"], false, "mismatched pair should be invalid");
+    assert_eq!(
+        json["valid_pair"], false,
+        "mismatched pair should be invalid"
+    );
 }
 
 // ── POST /control/tls/configure ──────────────────────────────────────────────

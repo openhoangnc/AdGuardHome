@@ -26,9 +26,15 @@ pub struct TlsConfig {
     pub strict_sni_check: bool,
 }
 
-fn default_port_https() -> u16 { 443 }
-fn default_port_dns_over_tls() -> u16 { 853 }
-fn default_port_dns_over_quic() -> u16 { 784 }
+fn default_port_https() -> u16 {
+    443
+}
+fn default_port_dns_over_tls() -> u16 {
+    853
+}
+fn default_port_dns_over_quic() -> u16 {
+    784
+}
 
 impl Default for TlsConfig {
     fn default() -> Self {

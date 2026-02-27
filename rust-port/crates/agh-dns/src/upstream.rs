@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use hickory_proto::op::Message;
-use hickory_resolver::config::ResolverConfig;
 use hickory_resolver::TokioResolver;
+use hickory_resolver::config::ResolverConfig;
 
 use crate::{DnsError, server::QueryHandler};
 

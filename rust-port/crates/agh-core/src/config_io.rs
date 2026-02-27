@@ -56,8 +56,7 @@ impl ConfigManager {
     /// Use `get_async()` from within async code.
     pub fn get(&self) -> AdGuardHomeConfig {
         tokio::task::block_in_place(|| {
-            tokio::runtime::Handle::current()
-                .block_on(async { self.config.read().await.clone() })
+            tokio::runtime::Handle::current().block_on(async { self.config.read().await.clone() })
         })
     }
 
@@ -85,9 +84,7 @@ impl ConfigManager {
 }
 
 async fn write_atomic(path: &Path, content: &str) -> Result<(), ConfigError> {
-    let mut tmp_name = path.file_name()
-        .unwrap_or_default()
-        .to_os_string();
+    let mut tmp_name = path.file_name().unwrap_or_default().to_os_string();
     tmp_name.push(".tmp");
     let tmp = path.with_file_name(tmp_name);
     tokio::fs::write(&tmp, content).await?;
@@ -124,7 +121,9 @@ mod tests {
         let dir = tempdir();
         let path = dir.path().join("AdGuardHome.yaml");
         let mgr = ConfigManager::load(&path).await.expect("load");
-        mgr.update(|cfg| cfg.auth_attempts = 10).await.expect("update");
+        mgr.update(|cfg| cfg.auth_attempts = 10)
+            .await
+            .expect("update");
 
         let mgr2 = ConfigManager::load(&path).await.expect("reload");
         assert!(!mgr2.is_first_run());

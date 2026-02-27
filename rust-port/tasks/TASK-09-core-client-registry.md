@@ -54,13 +54,13 @@ Implement the client registry — the in-memory store of persistent client confi
 
   impl ClientRegistry {
       pub fn new(clients: Vec<PersistentClient>) -> Self;
-      
+
       /// Find persistent client by IP/MAC/CIDR match
       pub fn find_persistent(&self, ip: &IpAddr) -> Option<PersistentClient>;
-      
+
       pub fn find_runtime(&self, ip: &IpAddr) -> Option<RuntimeClient>;
       pub fn add_runtime(&self, client: RuntimeClient);
-      
+
       pub fn list_persistent(&self) -> Vec<PersistentClient>;
       pub fn add_persistent(&self, client: PersistentClient) -> Result<(), ClientError>;
       pub fn remove_persistent(&self, name: &str) -> Result<(), ClientError>;

@@ -78,17 +78,32 @@ pub struct DnsConfig {
     pub private_networks: Vec<String>,
 }
 
-fn default_bind_hosts() -> Vec<String> { vec!["0.0.0.0".to_string()] }
-fn default_port() -> u16 { 53 }
+fn default_bind_hosts() -> Vec<String> {
+    vec!["0.0.0.0".to_string()]
+}
+fn default_port() -> u16 {
+    53
+}
 fn default_upstreams() -> Vec<String> {
     vec!["https://dns10.quad9.net/dns-query".to_string()]
 }
 fn default_bootstrap() -> Vec<String> {
-    vec!["9.9.9.10".to_string(), "149.112.112.10".to_string(), "2620:fe::10".to_string(), "2620:fe::fe:10".to_string()]
+    vec![
+        "9.9.9.10".to_string(),
+        "149.112.112.10".to_string(),
+        "2620:fe::10".to_string(),
+        "2620:fe::fe:10".to_string(),
+    ]
 }
-fn default_true() -> bool { true }
-fn default_cache_size() -> u32 { 4194304 }
-fn default_upstream_mode() -> String { "load_balance".to_string() }
+fn default_true() -> bool {
+    true
+}
+fn default_cache_size() -> u32 {
+    4194304
+}
+fn default_upstream_mode() -> String {
+    "load_balance".to_string()
+}
 
 impl Default for DnsConfig {
     fn default() -> Self {

@@ -69,7 +69,7 @@ Implement the complete `AdGuardHomeConfig` struct tree in `agh-core` with `serde
   #[cfg(test)]
   mod tests {
       use super::*;
-      
+
       #[test]
       fn test_default_config_serializes() {
           let cfg = AdGuardHomeConfig::default();
@@ -77,7 +77,7 @@ Implement the complete `AdGuardHomeConfig` struct tree in `agh-core` with `serde
           let roundtrip: AdGuardHomeConfig = serde_yaml::from_str(&yaml).unwrap();
           assert_eq!(cfg.schema_version, roundtrip.schema_version);
       }
-      
+
       #[test]
       fn test_partial_config_deserializes() {
           let yaml = "schema_version: 28\nhttp:\n  address: 0.0.0.0:3000\n";

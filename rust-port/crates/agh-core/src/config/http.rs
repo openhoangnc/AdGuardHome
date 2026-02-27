@@ -8,10 +8,15 @@ pub struct HttpConfig {
     pub session_ttl: String,
 }
 
-fn default_address() -> String { "0.0.0.0:3000".to_string() }
+fn default_address() -> String {
+    "0.0.0.0:3000".to_string()
+}
 
 impl Default for HttpConfig {
     fn default() -> Self {
-        Self { address: default_address(), session_ttl: "720h".to_string() }
+        Self {
+            address: default_address(),
+            session_ttl: "720h".to_string(),
+        }
     }
 }

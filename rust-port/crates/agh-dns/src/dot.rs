@@ -66,7 +66,10 @@ where
         }
 
         let mut msg_buf = vec![0u8; msg_len];
-        stream.read_exact(&mut msg_buf).await.map_err(DnsError::Io)?;
+        stream
+            .read_exact(&mut msg_buf)
+            .await
+            .map_err(DnsError::Io)?;
 
         let request = match Message::from_bytes(&msg_buf) {
             Ok(m) => m,
@@ -79,8 +82,14 @@ where
         };
 
         let resp_len = response_bytes.len() as u16;
-        stream.write_all(&resp_len.to_be_bytes()).await.map_err(DnsError::Io)?;
-        stream.write_all(&response_bytes).await.map_err(DnsError::Io)?;
+        stream
+            .write_all(&resp_len.to_be_bytes())
+            .await
+            .map_err(DnsError::Io)?;
+        stream
+            .write_all(&response_bytes)
+            .await
+            .map_err(DnsError::Io)?;
     }
     Ok(())
 }
@@ -88,10 +97,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_trait::async_trait;
     use hickory_proto::op::{Message, MessageType, OpCode, Query, ResponseCode};
     use hickory_proto::rr::{DNSClass, Name, RecordType};
     use hickory_proto::serialize::binary::{BinDecodable, BinEncodable};
-    use async_trait::async_trait;
 
     struct EchoHandler;
 
@@ -130,15 +139,14 @@ mod tests {
 
         let (mut cr, mut cw) = tokio::io::split(client);
 
-        // Write query + close write side (EOF ends the server loop).
+        // Run the server concurrently so write + read can interleave.
+        let server_task = tokio::spawn(handle_dot_connection(server, handler));
+
+        // Send the query frame then shut down the write half to signal EOF.
         cw.write_all(&frame).await.unwrap();
-        drop(cw);
+        cw.shutdown().await.unwrap();
 
-        // Run the server handler on the server side.
-        let result = handle_dot_connection(server, handler).await;
-        assert!(result.is_ok());
-
-        // Read the response from our client side.
+        // Read the response.
         let mut resp_len_buf = [0u8; 2];
         cr.read_exact(&mut resp_len_buf).await.unwrap();
         let resp_len = u16::from_be_bytes(resp_len_buf) as usize;
@@ -148,6 +156,7 @@ mod tests {
         let response = Message::from_bytes(&resp_buf).unwrap();
         assert_eq!(response.id(), 1234);
         assert_eq!(response.message_type(), MessageType::Response);
+
+        server_task.await.unwrap().unwrap();
     }
 }
-

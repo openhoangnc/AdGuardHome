@@ -39,11 +39,19 @@ impl FilterUpdater {
             .timeout(Duration::from_secs(60))
             .build()
             .expect("HTTP client");
-        Self { engine, http, cache_dir }
+        Self {
+            engine,
+            http,
+            cache_dir,
+        }
     }
 
     /// Download and reload a single filter list by URL.
-    pub async fn update_filter(&self, filter_id: u64, url: &str) -> Result<UpdateStats, UpdaterError> {
+    pub async fn update_filter(
+        &self,
+        filter_id: u64,
+        url: &str,
+    ) -> Result<UpdateStats, UpdaterError> {
         let content = if url.starts_with("file://") {
             let path = url.trim_start_matches("file://");
             tokio::fs::read_to_string(path).await?
@@ -62,7 +70,11 @@ impl FilterUpdater {
         let cache_path = self.cache_dir.join(format!("{filter_id}.txt"));
         tokio::fs::write(&cache_path, &content).await?;
 
-        Ok(UpdateStats { filter_id, rules_count, updated_at: Utc::now() })
+        Ok(UpdateStats {
+            filter_id,
+            rules_count,
+            updated_at: Utc::now(),
+        })
     }
 
     /// Update all provided filters.
@@ -91,7 +103,11 @@ impl FilterUpdater {
                 let results = self.update_all(&filters).await;
                 for r in results {
                     match r {
-                        Ok(s) => tracing::info!(filter_id = s.filter_id, rules = s.rules_count, "filter updated"),
+                        Ok(s) => tracing::info!(
+                            filter_id = s.filter_id,
+                            rules = s.rules_count,
+                            "filter updated"
+                        ),
                         Err(e) => tracing::warn!(error = %e, "filter update failed"),
                     }
                 }
@@ -114,7 +130,9 @@ mod tests {
     async fn test_update_from_file_url() {
         let dir = tempfile::tempdir().expect("tempdir");
         let filter_file = dir.path().join("filter.txt");
-        tokio::fs::write(&filter_file, "||ads.example.com^\n").await.expect("write");
+        tokio::fs::write(&filter_file, "||ads.example.com^\n")
+            .await
+            .expect("write");
         let url = format!("file://{}", filter_file.display());
 
         let engine_ref = empty_engine();

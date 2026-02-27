@@ -20,8 +20,12 @@ pub struct LogConfig {
     pub verbose: bool,
 }
 
-fn default_true() -> bool { true }
-fn default_log_max_size() -> i32 { 100 }
+fn default_true() -> bool {
+    true
+}
+fn default_log_max_size() -> i32 {
+    100
+}
 
 impl Default for LogConfig {
     fn default() -> Self {

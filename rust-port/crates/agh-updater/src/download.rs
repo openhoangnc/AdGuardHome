@@ -55,7 +55,10 @@ mod tests {
     fn test_sha256_correct() {
         // SHA256 of empty bytes
         let hash = compute_sha256(b"");
-        assert_eq!(hash, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+        assert_eq!(
+            hash,
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        );
     }
 
     #[tokio::test]

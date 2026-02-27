@@ -107,8 +107,8 @@ fn test_config_flag_short() {
 #[test]
 fn test_service_install() {
     let cli = Cli::parse_from(["adguardhome", "service", "install"]);
-    assert!(matches!(cli.service, Some(ServiceCommand::Service { 
-        action: ServiceAction::Install 
+    assert!(matches!(cli.service, Some(ServiceCommand::Service {
+        action: ServiceAction::Install
     })));
 }
 
@@ -116,7 +116,7 @@ fn test_service_install() {
 fn test_docker_cmd() {
     // Reproduce the Docker CMD: -c /opt/.../conf/AdGuardHome.yaml -w /opt/.../work --no-check-update
     let cli = Cli::parse_from([
-        "adguardhome", 
+        "adguardhome",
         "-c", "/opt/adguardhome/conf/AdGuardHome.yaml",
         "-w", "/opt/adguardhome/work",
         "--no-check-update"

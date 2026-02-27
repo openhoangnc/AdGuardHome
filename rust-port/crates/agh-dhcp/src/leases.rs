@@ -39,8 +39,7 @@ impl LeaseStore {
 
     pub async fn save(&self) -> std::io::Result<()> {
         let leases = self.leases.read().await;
-        let content = serde_json::to_string_pretty(&*leases)
-            .map_err(std::io::Error::other)?;
+        let content = serde_json::to_string_pretty(&*leases).map_err(std::io::Error::other)?;
         tokio::fs::write(&self.path, content).await
     }
 
@@ -67,7 +66,12 @@ impl LeaseStore {
 
     /// Find a lease by MAC address (or DUID for DHCPv6).
     pub async fn find_by_mac(&self, mac: &str) -> Option<Lease> {
-        self.leases.read().await.iter().find(|l| l.mac == mac).cloned()
+        self.leases
+            .read()
+            .await
+            .iter()
+            .find(|l| l.mac == mac)
+            .cloned()
     }
 
     /// Return true if the given IP string is already assigned to any lease.
@@ -95,7 +99,10 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("leases.json");
         let store = LeaseStore::load(&path).await.expect("load");
-        store.add_or_update(make_lease("AA:BB:CC:DD:EE:FF", "192.168.1.100")).await.expect("add");
+        store
+            .add_or_update(make_lease("AA:BB:CC:DD:EE:FF", "192.168.1.100"))
+            .await
+            .expect("add");
         let all = store.all().await;
         assert_eq!(all.len(), 1);
         assert_eq!(all[0].hostname, "test-host");
@@ -106,7 +113,10 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("leases.json");
         let store = LeaseStore::load(&path).await.expect("load");
-        store.add_or_update(make_lease("DE:AD:BE:EF:00:01", "10.0.0.1")).await.expect("add");
+        store
+            .add_or_update(make_lease("DE:AD:BE:EF:00:01", "10.0.0.1"))
+            .await
+            .expect("add");
         let found = store.find_by_mac("DE:AD:BE:EF:00:01").await;
         assert!(found.is_some());
         assert_eq!(found.unwrap().ip, "10.0.0.1");
@@ -117,7 +127,10 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("leases.json");
         let store = LeaseStore::load(&path).await.expect("load");
-        store.add_or_update(make_lease("01:02:03:04:05:06", "172.16.0.5")).await.expect("add");
+        store
+            .add_or_update(make_lease("01:02:03:04:05:06", "172.16.0.5"))
+            .await
+            .expect("add");
         assert!(store.is_ip_taken("172.16.0.5").await);
         assert!(!store.is_ip_taken("172.16.0.6").await);
     }
@@ -127,10 +140,15 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         let path = dir.path().join("leases.json");
         let store = LeaseStore::load(&path).await.expect("load");
-        store.add_or_update(make_lease("AA:AA:AA:AA:AA:AA", "192.168.0.1")).await.expect("add");
+        store
+            .add_or_update(make_lease("AA:AA:AA:AA:AA:AA", "192.168.0.1"))
+            .await
+            .expect("add");
         assert_eq!(store.all().await.len(), 1);
-        store.remove_by_mac("AA:AA:AA:AA:AA:AA").await.expect("remove");
+        store
+            .remove_by_mac("AA:AA:AA:AA:AA:AA")
+            .await
+            .expect("remove");
         assert_eq!(store.all().await.len(), 0);
     }
 }
-

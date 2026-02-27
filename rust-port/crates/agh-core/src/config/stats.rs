@@ -10,11 +10,19 @@ pub struct StatisticsConfig {
     pub ignored: Vec<String>,
 }
 
-fn default_true() -> bool { true }
-fn default_interval() -> String { "24h".to_string() }
+fn default_true() -> bool {
+    true
+}
+fn default_interval() -> String {
+    "24h".to_string()
+}
 
 impl Default for StatisticsConfig {
     fn default() -> Self {
-        Self { enabled: true, interval: "24h".to_string(), ignored: Vec::new() }
+        Self {
+            enabled: true,
+            interval: "24h".to_string(),
+            ignored: Vec::new(),
+        }
     }
 }

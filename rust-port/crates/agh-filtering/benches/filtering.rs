@@ -10,7 +10,9 @@ use agh_filtering::parser::{FilterRule, parse_filter};
 /// Build a FilteringEngine with N simple block rules (||aN.example^ format).
 fn build_engine_with_n_rules(n: usize) -> FilteringEngine {
     let rules: Vec<FilterRule> = (0..n)
-        .map(|i| FilterRule::DomainBlock { domain: format!("a{i}.example.com") })
+        .map(|i| FilterRule::DomainBlock {
+            domain: format!("a{i}.example.com"),
+        })
         .collect();
     FilteringEngine::build(rules)
 }
@@ -29,11 +31,19 @@ fn bench_engine_build_time(c: &mut Criterion) {
     for &n in &[1_000usize, 10_000, 100_000, 500_000] {
         group.bench_with_input(BenchmarkId::from_parameter(n), &n, |b, &n| {
             let rules: Vec<FilterRule> = (0..n)
-                .map(|i| FilterRule::Block { domain: format!("a{i}.example.com") })
+                .map(|i| FilterRule::Block {
+                    domain: format!("a{i}.example.com"),
+                })
                 .collect();
-            b.iter(|| FilteringEngine::build(black_box(
-                (0..n).map(|i| FilterRule::DomainBlock { domain: format!("a{i}.example.com") }).collect()
-            )))
+            b.iter(|| {
+                FilteringEngine::build(black_box(
+                    (0..n)
+                        .map(|i| FilterRule::DomainBlock {
+                            domain: format!("a{i}.example.com"),
+                        })
+                        .collect(),
+                ))
+            })
         });
     }
     group.finish();

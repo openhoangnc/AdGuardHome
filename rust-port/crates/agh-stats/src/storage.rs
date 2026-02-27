@@ -14,7 +14,7 @@ pub struct StatsBucket {
     pub replaced_safebrowsing: u64,
     pub replaced_parental: u64,
     pub replaced_safesearch: u64,
-    pub timestamp: i64,  // Unix seconds for the start of this bucket
+    pub timestamp: i64, // Unix seconds for the start of this bucket
 }
 
 /// In-memory stats storage (simplified — no redb persistence yet).
@@ -37,14 +37,21 @@ impl StatsStorage {
         if let Some(last) = buckets.last_mut() {
             if last.timestamp == ts {
                 last.total_queries += 1;
-                if blocked { last.blocked_queries += 1; }
+                if blocked {
+                    last.blocked_queries += 1;
+                }
                 return;
             }
         }
         // New bucket.
-        let mut bucket = StatsBucket { timestamp: ts, ..Default::default() };
+        let mut bucket = StatsBucket {
+            timestamp: ts,
+            ..Default::default()
+        };
         bucket.total_queries = 1;
-        if blocked { bucket.blocked_queries = 1; }
+        if blocked {
+            bucket.blocked_queries = 1;
+        }
         buckets.push(bucket);
         // Trim to max_buckets.
         if buckets.len() > self.max_buckets {
@@ -58,11 +65,21 @@ impl StatsStorage {
     }
 
     pub async fn total_queries(&self) -> u64 {
-        self.buckets.read().await.iter().map(|b| b.total_queries).sum()
+        self.buckets
+            .read()
+            .await
+            .iter()
+            .map(|b| b.total_queries)
+            .sum()
     }
 
     pub async fn total_blocked(&self) -> u64 {
-        self.buckets.read().await.iter().map(|b| b.blocked_queries).sum()
+        self.buckets
+            .read()
+            .await
+            .iter()
+            .map(|b| b.blocked_queries)
+            .sum()
     }
 }
 
@@ -86,7 +103,11 @@ mod tests {
         {
             let mut buckets = store.buckets.write().await;
             for i in 0..5i64 {
-                buckets.push(StatsBucket { timestamp: i * 3600, total_queries: 1, ..Default::default() });
+                buckets.push(StatsBucket {
+                    timestamp: i * 3600,
+                    total_queries: 1,
+                    ..Default::default()
+                });
             }
             // Trim manually as record_query does.
             if buckets.len() > store.max_buckets {
