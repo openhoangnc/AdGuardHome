@@ -11,8 +11,7 @@ use axum::response::IntoResponse;
 // Embed the frontend build directory if it exists.
 // If `build/` doesn't exist at compile time, RustEmbed serves nothing.
 #[derive(rust_embed::RustEmbed)]
-#[folder = "../../../build"]
-#[prefix = "/"]
+#[folder = "../../../build/static"]
 struct FrontendAssets;
 
 /// Serve the frontend SPA. Falls back to index.html for unknown paths.

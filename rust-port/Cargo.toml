@@ -54,6 +54,7 @@ rustls-pemfile     = { version = "2", package = "rustls-pemfile" }
 
 [profile.release]
 strip         = true
-opt-level     = 3
-lto           = "thin"
+opt-level     = "z"
+lto           = true
 codegen-units = 1
+panic         = "abort"

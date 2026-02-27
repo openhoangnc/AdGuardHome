@@ -29,6 +29,11 @@ ARG BUILDPLATFORM
 RUN apk add --no-cache musl-dev gcc g++ make perl git zig && \
     cargo install cargo-zigbuild
 
+# Dynamic musl linking: omit the static libc from the binary.
+# Alpine ships musl.so natively, so the binary stays small without any extra
+# runtime packages.  Remove this line if you ever target a non-musl runtime.
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+
 # Use /app as WORKDIR so that rust-port/ lives at /app/rust-port/ and
 # #[folder = "../../../build"] in agh-web resolves to /app/build/ —
 # the same path where the frontend stage places its output.
@@ -79,7 +84,7 @@ RUN TARGET=$(cat /tmp/target) && \
     cp "target/$TARGET/release/adguardhome" /adguardhome
 
 # ── Stage 3: Runtime ───────────────────────────────────────────────────────
-FROM alpine:3.20 AS runtime
+FROM alpine:3 AS runtime
 
 LABEL org.opencontainers.image.source="https://github.com/AdguardTeam/AdGuardHome"
 LABEL org.opencontainers.image.title="AdGuard Home (Rust port)"
@@ -89,7 +94,6 @@ RUN apk add --no-cache ca-certificates tzdata libcap && \
     mkdir -p /opt/adguardhome/conf /opt/adguardhome/work
 
 COPY --from=rust-builder /adguardhome /opt/adguardhome/AdGuardHome
-COPY --from=frontend     /app/build/  /opt/adguardhome/build/
 
 # Allow the binary to bind privileged ports (53, 67, 443, 853) without root.
 RUN setcap 'cap_net_bind_service=+ep' /opt/adguardhome/AdGuardHome
